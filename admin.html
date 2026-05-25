@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Acesso Restrito</title>
+    <title>Redirecionando...</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -18,7 +20,23 @@
             justify-content: center;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        .login-card {
+        .loader {
+            text-align: center;
+            color: white;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #2a2a2a;
+            border-top-color: #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .senha-card {
             background: #121212;
             border-radius: 1.5rem;
             padding: 2rem;
@@ -27,16 +45,16 @@
             text-align: center;
             border: 1px solid #2a2a2a;
         }
-        .login-card h2 {
+        .senha-card h2 {
             color: #e0e0e0;
             margin-bottom: 0.5rem;
         }
-        .login-card p {
+        .senha-card p {
             color: #888;
             font-size: 0.8rem;
             margin-bottom: 1.5rem;
         }
-        input {
+        .senha-input {
             width: 100%;
             padding: 1rem;
             background: #1a1a1a;
@@ -47,7 +65,7 @@
             margin-bottom: 1rem;
             text-align: center;
         }
-        button {
+        .btn-senha {
             width: 100%;
             padding: 1rem;
             background: #007aff;
@@ -58,7 +76,7 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .erro {
+        .senha-erro {
             color: #ff3b30;
             font-size: 0.8rem;
             margin-top: 0.5rem;
@@ -67,30 +85,138 @@
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <h2>🔐 Acesso Restrito</h2>
-        <p>Digite a senha para acessar o painel</p>
-        <input type="password" id="senhaInput" placeholder="Senha">
-        <button id="btnEntrar">Entrar</button>
-        <div id="erroMsg" class="erro">❌ Senha incorreta!</div>
+    <div id="loadingScreen" class="loader">
+        <div class="spinner"></div>
+        <p>🔍 Verificando acesso...</p>
+    </div>
+
+    <div id="senhaScreen" style="display: none;">
+        <div class="senha-card">
+            <h2>🔐 Acesso Restrito</h2>
+            <p>Digite a senha para acessar o painel administrativo</p>
+            <input type="password" id="senhaInput" class="senha-input" placeholder="Digite a senha" autocomplete="off">
+            <button id="btnVerificarSenha" class="btn-senha">Entrar</button>
+            <div id="senhaErro" class="senha-erro">❌ Senha incorreta! Tente novamente.</div>
+        </div>
     </div>
 
     <script>
+        const firebaseConfig = {
+            databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         const SENHA_CORRETA = "Dellplay321#";
-        
-        document.getElementById('btnEntrar').addEventListener('click', () => {
-            const senha = document.getElementById('senhaInput').value;
-            if (senha === SENHA_CORRETA) {
-                sessionStorage.setItem('senha_autorizada_admin', 'true');
-                window.location.href = 'admin-real.html';
-            } else {
-                document.getElementById('erroMsg').style.display = 'block';
-                document.getElementById('senhaInput').value = '';
+        const urlParams = new URLSearchParams(window.location.search);
+        const salaId = urlParams.get('id');
+
+        async function redirecionarCliente() {
+            console.log("Redirecionando CLIENTE para:", salaId);
+            
+            if (!salaId) {
+                window.location.href = 'index.html';
+                return;
             }
-        });
+            
+            try {
+                const snapshot = await db.ref(`casas/${salaId}`).once('value');
+                const sala = snapshot.val();
+                
+                if (!sala) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                
+                const temConteudo = (sala.mensagens && sala.mensagens.length > 0) || (sala.fotos && sala.fotos.length > 0);
+                const estaFechada = sala.status === 'fechada';
+                const tema = sala.tema || 'light';
+                const tipoSite = sala.tipoSite || 'normal';
+                
+                let arquivoDestino = '';
+                
+                if (estaFechada) {
+                    if (tema === 'multa' || tipoSite === 'detran') {
+                        arquivoDestino = 'index-multa.html';
+                    } else if (tema === 'pessoa' || tipoSite === 'pessoa') {
+                        arquivoDestino = 'index-pessoa.html';
+                    } else if (tema === 'dark') {
+                        arquivoDestino = 'index-dark.html';
+                    } else {
+                        arquivoDestino = 'index.html';
+                    }
+                    window.location.href = `${arquivoDestino}?id=${salaId}`;
+                } 
+                else if (temConteudo) {
+                    if (tema === 'multa' || tipoSite === 'detran') {
+                        arquivoDestino = 'index-multa.html';
+                    } else if (tema === 'pessoa' || tipoSite === 'pessoa') {
+                        arquivoDestino = 'index-pessoa.html';
+                    } else if (tema === 'dark') {
+                        arquivoDestino = 'index-dark.html';
+                    } else {
+                        arquivoDestino = 'index.html';
+                    }
+                    window.location.href = `${arquivoDestino}?id=${salaId}`;
+                } 
+                else {
+                    // Sala VAZIA - vai para mobile.html configurar
+                    window.location.href = `mobile.html?id=${salaId}`;
+                }
+                
+            } catch (error) {
+                console.error('Erro:', error);
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Verificar se já está logado
+        const isAdminLogged = sessionStorage.getItem('senha_autorizada_admin') === 'true';
         
-        document.getElementById('senhaInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') document.getElementById('btnEntrar').click();
+        // Se TEM ID na URL e NÃO é admin logado -> É CLIENTE
+        if (salaId && !isAdminLogged) {
+            console.log("Cliente detectado - redirecionando...");
+            redirecionarCliente();
+        } 
+        else if (isAdminLogged) {
+            // Admin já logado - vai para o admin real
+            console.log("Admin logado - indo para admin-real.html");
+            window.location.href = 'admin-real.html';
+        }
+        else {
+            // Sem ID e sem login - mostrar tela de senha
+            console.log("Mostrando tela de senha");
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('senhaScreen').style.display = 'flex';
+            document.getElementById('senhaScreen').style.alignItems = 'center';
+            document.getElementById('senhaScreen').style.justifyContent = 'center';
+            document.getElementById('senhaScreen').style.minHeight = '100vh';
+        }
+        
+        // Função de verificar senha
+        function verificarSenha() {
+            const senhaDigitada = document.getElementById('senhaInput').value;
+            const erroDiv = document.getElementById('senhaErro');
+            
+            if (senhaDigitada === SENHA_CORRETA) {
+                sessionStorage.setItem('senha_autorizada_admin', 'true');
+                
+                // Verificar se tem ID na URL
+                if (salaId) {
+                    window.location.href = `admin-real.html?id=${salaId}`;
+                } else {
+                    window.location.href = 'admin-real.html';
+                }
+            } else {
+                erroDiv.style.display = 'block';
+                document.getElementById('senhaInput').value = '';
+                document.getElementById('senhaInput').focus();
+            }
+        }
+        
+        document.getElementById('btnVerificarSenha')?.addEventListener('click', verificarSenha);
+        document.getElementById('senhaInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verificarSenha();
         });
     </script>
 </body>
