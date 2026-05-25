@@ -12,7 +12,6 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             background: #0a0a0a;
             min-height: 100vh;
@@ -21,12 +20,10 @@
             justify-content: center;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-
         .loader {
             text-align: center;
             color: white;
         }
-
         .spinner {
             width: 40px;
             height: 40px;
@@ -36,7 +33,6 @@
             animation: spin 1s linear infinite;
             margin: 1rem auto;
         }
-
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
@@ -45,7 +41,8 @@
 <body>
     <div class="loader">
         <div class="spinner"></div>
-        <p>🔍 Redirecionando...</p>
+        <p>🔍 Redirecionando para a página correta...</p>
+        <p id="statusMsg" style="font-size:0.8rem; margin-top:1rem; color:#888;"></p>
     </div>
 
     <script>
@@ -58,84 +55,73 @@
         const urlParams = new URLSearchParams(window.location.search);
         const salaId = urlParams.get('id');
 
-        console.log("Redirect - Sala ID:", salaId);
-
-        if (!salaId) {
-            console.log("Sem ID, indo para index.html");
-            window.location.href = 'index.html';
-        } else {
-            verificarSalaERedirecionar(salaId);
-        }
-
-        async function verificarSalaERedirecionar(id) {
+        async function redirecionar() {
+            const statusMsg = document.getElementById('statusMsg');
+            
+            if (!salaId) {
+                statusMsg.innerHTML = 'ID inválido, redirecionando...';
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                return;
+            }
+            
             try {
-                console.log("Verificando sala:", id);
-                const snapshot = await db.ref(`casas/${id}`).once('value');
+                statusMsg.innerHTML = 'Verificando sala...';
+                
+                const snapshot = await db.ref(`casas/${salaId}`).once('value');
                 const sala = snapshot.val();
                 
-                console.log("Sala encontrada:", sala);
-
                 if (!sala) {
-                    console.log("Sala não encontrada, indo para index.html");
-                    window.location.href = 'index.html';
+                    statusMsg.innerHTML = 'Sala não encontrada, redirecionando...';
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
                     return;
                 }
-
+                
                 const temConteudo = (sala.mensagens && sala.mensagens.length > 0) || (sala.fotos && sala.fotos.length > 0);
                 const estaFechada = sala.status === 'fechada';
                 const tema = sala.tema || 'light';
                 const tipoSite = sala.tipoSite || 'normal';
-
-                console.log("Tem conteúdo:", temConteudo);
-                console.log("Está fechada:", estaFechada);
-                console.log("Tema:", tema);
-                console.log("Tipo de site:", tipoSite);
-
-                // LÓGICA CORRETA DE REDIRECIONAMENTO:
-                // 1. Se sala está vazia (SEM conteúdo) -> vai para mobile.html para CONFIGURAR
-                // 2. Se sala tem conteúdo (CONFIGURADA) ou está fechada -> vai para a página correta (index, index-multa, etc.)
                 
                 let arquivoDestino = '';
-
+                
                 if (estaFechada) {
-                    // Sala fechada - mostrar página de sala fechada
-                    if (tema === 'multa' || tipoSite === 'detran') {
+                    statusMsg.innerHTML = 'Sala fechada, redirecionando...';
+                    if (tipoSite === 'detran') {
                         arquivoDestino = 'index-multa.html';
-                    } else if (tema === 'pessoa' || tipoSite === 'pessoa') {
+                    } else if (tipoSite === 'pessoa') {
                         arquivoDestino = 'index-pessoa.html';
                     } else if (tema === 'dark') {
                         arquivoDestino = 'index-dark.html';
                     } else {
                         arquivoDestino = 'index.html';
                     }
-                    console.log("Sala fechada, indo para", arquivoDestino);
-                    window.location.href = `${arquivoDestino}?id=${id}`;
+                    setTimeout(() => { window.location.href = `${arquivoDestino}?id=${salaId}`; }, 500);
                 } 
                 else if (temConteudo) {
-                    // Sala já configurada - mostrar página de visualização
-                    if (tema === 'multa' || tipoSite === 'detran') {
+                    statusMsg.innerHTML = 'Sala configurada, redirecionando...';
+                    if (tipoSite === 'detran') {
                         arquivoDestino = 'index-multa.html';
-                    } else if (tema === 'pessoa' || tipoSite === 'pessoa') {
+                    } else if (tipoSite === 'pessoa') {
                         arquivoDestino = 'index-pessoa.html';
                     } else if (tema === 'dark') {
                         arquivoDestino = 'index-dark.html';
                     } else {
                         arquivoDestino = 'index.html';
                     }
-                    console.log("Sala configurada, indo para", arquivoDestino);
-                    window.location.href = `${arquivoDestino}?id=${id}`;
+                    setTimeout(() => { window.location.href = `${arquivoDestino}?id=${salaId}`; }, 500);
                 } 
                 else {
-                    // Sala VAZIA - precisa configurar
-                    console.log("Sala VAZIA, indo para mobile.html para CONFIGURAR");
-                    window.location.href = `mobile.html?id=${id}`;
+                    statusMsg.innerHTML = 'Sala vazia, redirecionando para configuração...';
+                    setTimeout(() => { window.location.href = `mobile.html?id=${salaId}`; }, 500);
                 }
-
+                
             } catch (error) {
                 console.error('Erro:', error);
-                window.location.href = 'index.html';
+                statusMsg.innerHTML = 'Erro de conexão, redirecionando...';
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
             }
         }
+        
+        redirecionar();
     </script>
 </body>
 </html>
