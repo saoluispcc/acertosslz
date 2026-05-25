@@ -30,10 +30,9 @@
         const salaId = urlParams.get('id');
 
         async function redirecionar() {
-            console.log("Redirect iniciado - Sala ID:", salaId);
+            console.log("Redirect - Sala ID:", salaId);
             
             if (!salaId) {
-                console.log("Sem ID, indo para index.html");
                 window.location.href = 'index.html';
                 return;
             }
@@ -42,10 +41,7 @@
                 const snapshot = await db.ref(`casas/${salaId}`).once('value');
                 const sala = snapshot.val();
                 
-                console.log("Sala encontrada:", sala);
-                
                 if (!sala) {
-                    console.log("Sala nao encontrada");
                     window.location.href = 'index.html';
                     return;
                 }
@@ -55,11 +51,6 @@
                 const tema = sala.tema || 'light';
                 const tipoSite = sala.tipoSite || 'normal';
                 
-                console.log("Tem conteudo:", temConteudo);
-                console.log("Esta fechada:", estaFechada);
-                console.log("Tipo site:", tipoSite);
-                console.log("Tema:", tema);
-                
                 let destino = '';
                 
                 if (estaFechada) {
@@ -67,19 +58,16 @@
                     else if (tipoSite === 'pessoa') destino = 'index-pessoa.html';
                     else if (tema === 'dark') destino = 'index-dark.html';
                     else destino = 'index.html';
-                    console.log("SALA FECHADA - indo para:", destino);
                     window.location.href = `${destino}?id=${salaId}`;
-                }
-                else if (temConteudo === true) {
+                } 
+                else if (temConteudo) {
                     if (tipoSite === 'detran') destino = 'index-multa.html';
                     else if (tipoSite === 'pessoa') destino = 'index-pessoa.html';
                     else if (tema === 'dark') destino = 'index-dark.html';
                     else destino = 'index.html';
-                    console.log("SALA CONFIGURADA - indo para:", destino);
                     window.location.href = `${destino}?id=${salaId}`;
-                }
+                } 
                 else {
-                    console.log("SALA VAZIA - indo para mobile.html");
                     window.location.href = `mobile.html?id=${salaId}`;
                 }
                 
