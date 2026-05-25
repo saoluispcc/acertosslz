@@ -22,19 +22,32 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        .hidden-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            z-index: 9999;
+        .loader {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #2a2a2a;
+            border-top-color: #007aff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="hidden-container"></div>
+    <div class="loader">
+        <div class="spinner"></div>
+        <p>🔍 Redirecionando...</p>
+    </div>
+
     <script>
         const firebaseConfig = {
             databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/"
@@ -78,29 +91,43 @@
                 console.log("Tema:", tema);
                 console.log("Tipo de site:", tipoSite);
 
-                // Mapeamento de temas para os arquivos
-                let arquivoDestino = 'index.html';
+                // LÓGICA CORRETA DE REDIRECIONAMENTO:
+                // 1. Se sala está vazia (SEM conteúdo) -> vai para mobile.html para CONFIGURAR
+                // 2. Se sala tem conteúdo (CONFIGURADA) ou está fechada -> vai para a página correta (index, index-multa, etc.)
                 
-                if (tema === 'multa' || tipoSite === 'detran') {
-                    arquivoDestino = 'index-multa.html';
-                } else if (tema === 'pessoa' || tipoSite === 'pessoa') {
-                    arquivoDestino = 'index-pessoa.html';
-                } else if (tema === 'dark') {
-                    arquivoDestino = 'index-dark.html';
-                } else {
-                    arquivoDestino = 'index.html';
-                }
-
-                console.log("Arquivo destino:", arquivoDestino);
+                let arquivoDestino = '';
 
                 if (estaFechada) {
+                    // Sala fechada - mostrar página de sala fechada
+                    if (tema === 'multa' || tipoSite === 'detran') {
+                        arquivoDestino = 'index-multa.html';
+                    } else if (tema === 'pessoa' || tipoSite === 'pessoa') {
+                        arquivoDestino = 'index-pessoa.html';
+                    } else if (tema === 'dark') {
+                        arquivoDestino = 'index-dark.html';
+                    } else {
+                        arquivoDestino = 'index.html';
+                    }
                     console.log("Sala fechada, indo para", arquivoDestino);
                     window.location.href = `${arquivoDestino}?id=${id}`;
-                } else if (temConteudo) {
+                } 
+                else if (temConteudo) {
+                    // Sala já configurada - mostrar página de visualização
+                    if (tema === 'multa' || tipoSite === 'detran') {
+                        arquivoDestino = 'index-multa.html';
+                    } else if (tema === 'pessoa' || tipoSite === 'pessoa') {
+                        arquivoDestino = 'index-pessoa.html';
+                    } else if (tema === 'dark') {
+                        arquivoDestino = 'index-dark.html';
+                    } else {
+                        arquivoDestino = 'index.html';
+                    }
                     console.log("Sala configurada, indo para", arquivoDestino);
                     window.location.href = `${arquivoDestino}?id=${id}`;
-                } else {
-                    console.log("Sala vazia, indo para mobile.html");
+                } 
+                else {
+                    // Sala VAZIA - precisa configurar
+                    console.log("Sala VAZIA, indo para mobile.html para CONFIGURAR");
                     window.location.href = `mobile.html?id=${id}`;
                 }
 
