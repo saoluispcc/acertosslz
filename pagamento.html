@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Pagamento | Sistema Oficial</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        /* ==================== TEMA PADRÃO (DARK) ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body.pagamento-dark {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .pagamento-dark .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .pagamento-dark .card {
+            background: #121212;
+            border-radius: 1.5rem;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .pagamento-dark .card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #2a2a2a;
+            background: #0d0d0d;
+            text-align: center;
+        }
+
+        .pagamento-dark .card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ff9500;
+        }
+
+        .pagamento-dark .card-header p {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+
+        .pagamento-dark .card-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .pagamento-dark .qr-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            display: inline-block;
+            margin: 1rem 0;
+        }
+
+        .pagamento-dark .codigo-container {
+            background: #0d0d0d;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #2a2a2a;
+        }
+
+        .pagamento-dark .codigo-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .pagamento-dark .codigo-valor {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: #ff9500;
+            margin: 0.5rem 0;
+            word-break: break-all;
+        }
+
+        .pagamento-dark .btn-copiar {
+            background: #2a2a2a;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .pagamento-dark .btn-copiar:hover {
+            background: #3a3a3a;
+        }
+
+        .pagamento-dark .info-text {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        .pagamento-dark .btn-voltar {
+            background: #2a2a2a;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        /* ==================== TEMA DETRAN (INSTITUCIONAL) ==================== */
+        body.pagamento-detran {
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .pagamento-detran .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .pagamento-detran .top-bar {
+            background: #003366;
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.7rem;
+            text-align: center;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+
+        .pagamento-detran .card {
+            background: white;
+            border-radius: 0 0 0.75rem 0.75rem;
+            border: 1px solid #d4dce4;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .pagamento-detran .card-header {
+            padding: 1.2rem;
+            border-bottom: 1px solid #eef2f5;
+            background: #f8fafc;
+            text-align: center;
+        }
+
+        .pagamento-detran .card-header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #003366;
+        }
+
+        .pagamento-detran .card-header p {
+            font-size: 0.8rem;
+            color: #4a5c6a;
+            margin-top: 0.25rem;
+        }
+
+        .pagamento-detran .card-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .pagamento-detran .qr-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            display: inline-block;
+            margin: 1rem 0;
+            border: 1px solid #d4dce4;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .pagamento-detran .codigo-container {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            border: 1px solid #d4dce4;
+        }
+
+        .pagamento-detran .codigo-label {
+            font-size: 0.7rem;
+            color: #4a5c6a;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .pagamento-detran .codigo-valor {
+            font-size: 1.3rem;
+            font-weight: 700;
+            font-family: monospace;
+            color: #003366;
+            margin: 0.5rem 0;
+            word-break: break-all;
+        }
+
+        .pagamento-detran .btn-copiar {
+            background: #003366;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+
+        .pagamento-detran .btn-copiar:hover {
+            background: #002244;
+        }
+
+        .pagamento-detran .info-text {
+            font-size: 0.7rem;
+            color: #4a5c6a;
+            margin-top: 1rem;
+        }
+
+        .pagamento-detran .btn-voltar {
+            background: #003366;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+
+        .pagamento-detran .btn-voltar:hover {
+            background: #002244;
+            transform: translateY(-1px);
+        }
+
+        .pagamento-detran .footer-note {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.65rem;
+            color: #8b9eb0;
+        }
+
+        /* Classes comuns */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .error {
+            text-align: center;
+            padding: 2rem;
+            color: #cc3300;
+        }
+    </style>
+</head>
+<body id="pagamentoBody">
+<div class="container" id="mainContainer">
+    <div id="content">
+        <div class="loading">Carregando informações de pagamento...</div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const salaId = urlParams.get('id');
+
+    if (!salaId) {
+        document.getElementById('content').innerHTML = '<div class="error">❌ Código inválido</div>';
+    } else {
+        carregarPagamento(salaId);
+    }
+
+    async function carregarPagamento(id) {
+        try {
+            const snapshot = await db.ref(`casas/${id}`).once('value');
+            const sala = snapshot.val();
+
+            if (!sala) {
+                document.getElementById('content').innerHTML = '<div class="error">❌ Sala não encontrada</div>';
+                return;
+            }
+
+            const codigoPagamento = sala.codigoPagamento || 'NÃO DEFINIDO';
+            const tema = sala.tema || 'light';
+            
+            // Detectar qual tema usar para o pagamento
+            let temaPagamento = 'dark'; // padrão
+            if (tema === 'multa' || tema === 'detran') {
+                temaPagamento = 'detran';
+            } else {
+                temaPagamento = 'dark';
+            }
+            
+            // Aplicar a classe CSS correta no body
+            const body = document.getElementById('pagamentoBody');
+            body.className = `pagamento-${temaPagamento}`;
+            
+            let html = '';
+            
+            if (temaPagamento === 'detran') {
+                // TEMA DETRAN
+                html = `
+                    <div class="top-bar">
+                        GOVERNO DO ESTADO DO MARANHÃO | DETRAN/MA
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h1>💰 PAGAMENTO DE MULTAS</h1>
+                            <p>${escapeHtml(sala.nome)}</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="qr-container" id="qrContainer"></div>
+                            <div class="codigo-container">
+                                <div class="codigo-label">CÓDIGO DE PAGAMENTO / PIX</div>
+                                <div class="codigo-valor" id="codigoValor">${escapeHtml(codigoPagamento)}</div>
+                                <button class="btn-copiar" onclick="copiarCodigo()">📋 Copiar código</button>
+                            </div>
+                            <div class="info-text">
+                                🔍 Escaneie o QR Code ou copie o código acima para realizar o pagamento<br>
+                                O comprovante será enviado automaticamente para o sistema
+                            </div>
+                            <button class="btn-voltar" onclick="window.location.href='index-multa.html?id=${id}'">← Voltar para consulta</button>
+                            <div class="footer-note">
+                                Pagamento seguro - Ambiente oficial DETRAN/MA
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // TEMA PADRÃO (DARK)
+                html = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h1>💰 Pagamento</h1>
+                            <p>${escapeHtml(sala.nome)}</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="qr-container" id="qrContainer"></div>
+                            <div class="codigo-container">
+                                <div class="codigo-label">CÓDIGO PARA PAGAMENTO</div>
+                                <div class="codigo-valor" id="codigoValor">${escapeHtml(codigoPagamento)}</div>
+                                <button class="btn-copiar" onclick="copiarCodigo()">📋 Copiar código</button>
+                            </div>
+                            <div class="info-text">
+                                🔍 Escaneie o QR Code ou copie o código acima para realizar o pagamento
+                            </div>
+                            <button class="btn-voltar" onclick="window.location.href='index.html?id=${id}'">← Voltar para a sala</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('content').innerHTML = html;
+
+            // Gerar QR Code
+            new QRCode(document.getElementById("qrContainer"), {
+                text: codigoPagamento,
+                width: 200,
+                height: 200
+            });
+
+        } catch (error) {
+            console.error('Erro:', error);
+            document.getElementById('content').innerHTML = '<div class="error">❌ Erro ao carregar informações de pagamento</div>';
+        }
+    }
+
+    function copiarCodigo() {
+        const codigo = document.getElementById('codigoValor').innerText;
+        navigator.clipboard.writeText(codigo);
+        alert('✅ Código copiado para a área de transferência!');
+        
+        // Feedback visual adicional para tema DETRAN
+        const btn = document.querySelector('.btn-copiar');
+        if (btn) {
+            const textoOriginal = btn.innerText;
+            btn.innerText = '✓ COPIADO!';
+            setTimeout(() => {
+                btn.innerText = textoOriginal;
+            }, 2000);
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>
+</body>
+</html>

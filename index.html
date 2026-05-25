@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Portal | Sala Personalizada</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f4f4f6;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .timer-container {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #eaeef2;
+        }
+
+        .timer-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #8b9eb0;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .timer {
+            font-size: 3rem;
+            font-weight: 600;
+            color: #2c3e44;
+            letter-spacing: 1px;
+            font-feature-settings: 'tnum';
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-warning {
+            font-size: 0.7rem;
+            color: #8b9eb0;
+            margin-top: 0.75rem;
+            font-weight: 400;
+        }
+
+        .timer-warning.urgent {
+            color: #c95a4a;
+        }
+
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+            border: 1px solid #eaeef2;
+        }
+
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f5;
+            background: white;
+        }
+
+        .card-header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1a2a30;
+            letter-spacing: -0.3px;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .mensagens {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mensagem-item {
+            background: #f8fafc;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            border-left: 3px solid #c95a4a;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #2c3e44;
+        }
+
+        .fotos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .foto {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            background: #f8fafc;
+            border: 1px solid #eef2f5;
+        }
+
+        .foto:hover {
+            transform: scale(1.02);
+            opacity: 0.92;
+        }
+
+        .btn-pagar {
+            background: #2c3e44;
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin: 1rem 0;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-pagar:hover {
+            background: #1a2a30;
+            transform: translateY(-1px);
+        }
+
+        .btn-pagar:active {
+            transform: translateY(0);
+        }
+
+        .comprovante-area {
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .comprovante-title {
+            font-size: 0.7rem;
+            color: #8b9eb0;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .comprovante-input-area {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .file-btn {
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            border: 1px solid #e0e6ea;
+            color: #2c3e44;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+
+        .file-btn:hover {
+            background: #f0f4f8;
+            border-color: #cbd8e2;
+        }
+
+        .btn-enviar {
+            background: #c95a4a;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-enviar:hover {
+            background: #b04a3a;
+        }
+
+        /* Chat - sempre ativo */
+        .chat-area {
+            display: block;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eef2f5;
+        }
+
+        .chat-messages {
+            background: #f8fafc;
+            border-radius: 1rem;
+            height: 280px;
+            overflow-y: auto;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        .message-admin {
+            background: #eef2f5;
+            color: #1a2a30;
+            margin-left: auto;
+        }
+
+        .message-user {
+            background: #2c3e44;
+            color: white;
+            margin-right: auto;
+        }
+
+        .message small {
+            font-size: 0.6rem;
+            opacity: 0.6;
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 0.85rem 1rem;
+            background: white;
+            border: 1px solid #e0e6ea;
+            border-radius: 2rem;
+            color: #1a2a30;
+            font-size: 0.85rem;
+        }
+
+        .chat-input-area input:focus {
+            outline: none;
+            border-color: #c95a4a;
+        }
+
+        .chat-send-btn {
+            background: #c95a4a;
+            color: white;
+            border: none;
+            padding: 0.85rem 1.25rem;
+            border-radius: 2rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .sala-fechada {
+            text-align: center;
+            padding: 2.5rem;
+            background: white;
+            border-radius: 1.5rem;
+            border: 1px solid #eaeef2;
+        }
+
+        .sala-fechada h1 {
+            color: #c95a4a;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .sala-fechada p {
+            color: #7a8e9e;
+            line-height: 1.5;
+        }
+
+        .loading, .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #8b9eb0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e44;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            animation: fadeInOut 3s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            90% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+        }
+
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 1rem;
+        }
+
+        .close-img {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 1.8rem;
+            color: white;
+            cursor: pointer;
+            background: none;
+            border: none;
+            opacity: 0.7;
+        }
+
+        .close-img:hover {
+            opacity: 1;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: fadeInPopup 0.2s ease;
+            cursor: pointer;
+        }
+
+        @keyframes fadeInPopup {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .popup-container {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+            animation: scaleIn 0.2s ease;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.96); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .popup-container img {
+            max-width: 100%;
+            max-height: 85vh;
+            display: block;
+        }
+
+        .popup-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+
+        .popup-close-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .popup-timer-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .popup-timer-bar .timer-fill {
+            height: 100%;
+            width: 100%;
+            background: #c95a4a;
+            animation: timerProgress linear forwards;
+        }
+
+        @keyframes timerProgress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+    </style>
+</head>
+<body>
+<div id="loading" class="loading">Carregando...</div>
+<div id="content" style="display: none;"></div>
+<div id="imageModal" class="image-modal" onclick="fecharImagem()">
+    <button class="close-img" onclick="fecharImagem()">✕</button>
+    <img id="modalImage" src="">
+</div>
+
+<script>
+    const firebaseConfig = {
+        databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const casaId = urlParams.get('id');
+    let visitanteId = localStorage.getItem('visitanteId');
+    let currentExpiraEm = null;
+    let timerInterval = null;
+    let chatUnsubscribe = null;
+    let popupUnsubscribe = null;
+    let mensagemBoasVindasEnviada = false;
+
+    if (!visitanteId) {
+        visitanteId = 'v_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+        localStorage.setItem('visitanteId', visitanteId);
+    }
+
+    if (!casaId) {
+        document.getElementById('loading').innerHTML = '<div class="empty-state">Acesso inválido</div>';
+    } else {
+        registrarVisita();
+        carregarCasa(casaId);
+        monitorarTempoDaSala(casaId);
+    }
+
+    async function registrarVisita() {
+        const snapshot = await db.ref(`casas/${casaId}`).once('value');
+        const casa = snapshot.val();
+        if (casa && casa.nome) {
+            await db.ref(`visitantes/${visitanteId}`).set({
+                salaId: casaId,
+                salaNome: casa.nome,
+                idVisitante: visitanteId,
+                entrada: Date.now(),
+                ultimaAtividade: Date.now()
+            });
+            setInterval(() => {
+                db.ref(`visitantes/${visitanteId}/ultimaAtividade`).set(Date.now());
+            }, 30000);
+        }
+    }
+
+    function abrirImagem(src) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        modal.style.display = 'flex';
+        modalImg.src = src;
+    }
+
+    function fecharImagem() {
+        document.getElementById('imageModal').style.display = 'none';
+    }
+
+    function monitorarTempoDaSala(id) {
+        db.ref(`casas/${id}`).on('value', (snapshot) => {
+            const casa = snapshot.val();
+            if (casa && casa.expiraEm && currentExpiraEm !== casa.expiraEm) {
+                currentExpiraEm = casa.expiraEm;
+                if (timerInterval) clearInterval(timerInterval);
+                iniciarTimer(currentExpiraEm);
+                mostrarToast('O administrador alterou o tempo da sala');
+            }
+        });
+    }
+
+    function mostrarToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    function mostrarPopup(imagemUrl, duracaoMs, versaoAtual) {
+        const storageKey = `popup_visto_${casaId}`;
+        const versaoVista = localStorage.getItem(storageKey);
+        
+        if (versaoVista && parseInt(versaoVista) === versaoAtual) {
+            return;
+        }
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'popup-overlay';
+        
+        const container = document.createElement('div');
+        container.className = 'popup-container';
+        
+        const img = document.createElement('img');
+        img.src = imagemUrl;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '✕';
+        closeBtn.className = 'popup-close-btn';
+        
+        const timerBar = document.createElement('div');
+        timerBar.className = 'popup-timer-bar';
+        const timerFill = document.createElement('div');
+        timerFill.className = 'timer-fill';
+        timerFill.style.animationDuration = `${duracaoMs}ms`;
+        timerBar.appendChild(timerFill);
+        
+        container.appendChild(img);
+        container.appendChild(closeBtn);
+        container.appendChild(timerBar);
+        overlay.appendChild(container);
+        
+        document.body.appendChild(overlay);
+        
+        const fecharPopup = () => {
+            if (document.body.contains(overlay)) overlay.remove();
+        };
+        
+        closeBtn.onclick = (e) => { e.stopPropagation(); fecharPopup(); };
+        overlay.onclick = (e) => { if (e.target === overlay) fecharPopup(); };
+        setTimeout(fecharPopup, duracaoMs);
+        
+        localStorage.setItem(storageKey, versaoAtual.toString());
+    }
+
+    function monitorarPopup(id) {
+        if (popupUnsubscribe) popupUnsubscribe();
+        const popupRef = db.ref(`casas/${id}/popup`);
+        const listener = popupRef.on('value', (snapshot) => {
+            const popupConfig = snapshot.val();
+            if (popupConfig && popupConfig.ativo && popupConfig.imagem) {
+                const versao = popupConfig.versao || 1;
+                mostrarPopup(popupConfig.imagem, popupConfig.duracao || 5000, versao);
+            }
+        });
+        popupUnsubscribe = () => popupRef.off('value', listener);
+    }
+
+    // Função para enviar mensagem automática de boas-vindas (como se fosse do admin)
+    async function enviarMensagemBoasVindas(tipoSite, identificador) {
+        if (mensagemBoasVindasEnviada) return;
+        
+        let mensagem = '';
+        if (tipoSite === 'pessoa') {
+            mensagem = `⚠️ VOCÊ ESTÁ NO NOSSO ALVO ⚠️\nSeus passos estão sendo monitorados. Siga as instruções.`;
+        } else if (tipoSite === 'normal' || tipoSite === 'light') {
+            mensagem = `⚠️ SUA CASA ESTÁ NO NOSSO ALVO ⚠️\n`;
+        } else {
+            return; // DETRAN não recebe mensagem automática
+        }
+        
+        await db.ref(`chats/${casaId}/mensagens`).push({
+            de: 'admin',
+            texto: mensagem,
+            timestamp: Date.now(),
+            lida: false
+        });
+        
+        mensagemBoasVindasEnviada = true;
+    }
+
+    window.irParaPagamento = function() {
+        window.location.href = `pagamento.html?id=${casaId}`;
+    };
+
+    window.enviarComprovante = async function() {
+        const input = document.getElementById('fileInput');
+        const file = input.files[0];
+        if (!file) {
+            mostrarToast("Selecione um arquivo");
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const base64 = e.target.result;
+            const isImage = file.type.startsWith('image/');
+            
+            await db.ref(`chats/${casaId}/mensagens`).push({
+                de: 'user',
+                texto: `📎 ${file.name}`,
+                arquivo: base64,
+                nome: file.name,
+                tipo: isImage ? 'imagem' : 'arquivo',
+                timestamp: Date.now(),
+                lida: false
+            });
+            
+            mostrarToast("Arquivo enviado");
+            input.value = '';
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.enviarMensagemChat = async function() {
+        const input = document.getElementById('chatInput');
+        const texto = input.value.trim();
+        if (!texto) return;
+        
+        await db.ref(`chats/${casaId}/mensagens`).push({
+            de: 'user',
+            texto: texto,
+            timestamp: Date.now(),
+            lida: false
+        });
+        input.value = '';
+    };
+
+    function iniciarChat(id) {
+        if (chatUnsubscribe) chatUnsubscribe();
+        
+        const messagesDiv = document.getElementById('chatMessages');
+        const chatRef = db.ref(`chats/${id}/mensagens`).orderByChild('timestamp');
+        
+        const listener = chatRef.on('value', (snapshot) => {
+            const msgs = snapshot.val();
+            messagesDiv.innerHTML = '';
+            if (msgs) {
+                Object.values(msgs).forEach(msg => {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = `message ${msg.de === 'admin' ? 'message-admin' : 'message-user'}`;
+                    let content = `<strong>${msg.de === 'admin' ? 'Atendente' : 'Você'}</strong>`;
+                    if (msg.texto) content += `<div>${escapeHtml(msg.texto)}</div>`;
+                    if (msg.tipo === 'imagem' && msg.arquivo) {
+                        content += `<img src="${msg.arquivo}" class="message-img" onclick="abrirImagem('${msg.arquivo}')" style="max-width:150px; margin-top:0.5rem; border-radius:0.75rem; cursor:pointer;">`;
+                    } else if (msg.tipo === 'arquivo' && msg.arquivo && msg.nome) {
+                        content += `<div><a href="${msg.arquivo}" download="${msg.nome}" style="color:#c95a4a;">📎 ${msg.nome}</a></div>`;
+                    }
+                    content += `<small>${new Date(msg.timestamp).toLocaleTimeString()}</small>`;
+                    msgDiv.innerHTML = content;
+                    messagesDiv.appendChild(msgDiv);
+                });
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        });
+        
+        chatUnsubscribe = () => chatRef.off('value', listener);
+    }
+
+    async function carregarCasa(id) {
+        const snapshot = await db.ref(`casas/${id}`).once('value');
+        const casa = snapshot.val();
+        if (!casa) {
+            document.getElementById('loading').innerHTML = '<div class="empty-state">Sala não encontrada</div>';
+            return;
+        }
+        if (casa.status === 'fechada') {
+            const msg = casa.mensagemEncerramento || "Sala encerrada.";
+            document.getElementById('loading').innerHTML = `<div class="sala-fechada"><h1>Sala encerrada</h1><p>${msg}</p></div>`;
+            return;
+        }
+        
+        document.getElementById('loading').style.display = 'none';
+        const container = document.getElementById('content');
+        container.style.display = 'block';
+        
+        const tipoSite = casa.tipoSite || 'normal';
+        const nomeExibido = casa.nome.replace('Casa ', '').replace('Pessoa ', '');
+        
+        let html = `
+            <div class="container">
+                <div class="timer-container">
+                    <div class="timer-label">Tempo restante</div>
+                    <div class="timer" id="timerDisplay">--:--:--</div>
+                    <div class="timer-warning" id="timerWarning">Sistema será encerrado automaticamente</div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h1>${escapeHtml(nomeExibido)}</h1>
+                    </div>
+                    <div class="card-body">
+                        <div class="mensagens">
+        `;
+        
+        if (casa.mensagens && casa.mensagens.length > 0) {
+            casa.mensagens.forEach(msg => {
+                html += `<div class="mensagem-item">${escapeHtml(msg)}</div>`;
+            });
+        } else {
+            html += `<div class="mensagem-item">Nenhuma mensagem registrada</div>`;
+        }
+        
+        html += `</div>`;
+        
+        if (casa.fotos && casa.fotos.length > 0) {
+            html += `<div class="fotos-grid">`;
+            casa.fotos.forEach(foto => {
+                html += `<img src="${foto}" class="foto" onclick="abrirImagem('${foto}')">`;
+            });
+            html += `</div>`;
+        }
+        
+        html += `
+                        <button class="btn-pagar" onclick="irParaPagamento()">Pagar agora</button>
+                        
+                        <div class="comprovante-area">
+                            <div class="comprovante-title">Enviar comprovante</div>
+                            <div class="comprovante-input-area">
+                                <button class="file-btn" onclick="document.getElementById('fileInput').click()">Selecionar arquivo</button>
+                                <input type="file" id="fileInput" style="display:none" accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.*">
+                                <button class="btn-enviar" onclick="enviarComprovante()">Enviar</button>
+                            </div>
+                        </div>
+                        
+                        <div id="chatArea" class="chat-area">
+                            <div class="comprovante-title">Chat com atendente</div>
+                            <div id="chatMessages" class="chat-messages"></div>
+                            <div class="chat-input-area">
+                                <input type="text" id="chatInput" placeholder="Digite sua mensagem...">
+                                <button class="chat-send-btn" onclick="enviarMensagemChat()">Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        currentExpiraEm = casa.expiraEm || (Date.now() + (48 * 3600000));
+        iniciarTimer(currentExpiraEm);
+        
+        // Iniciar chat e enviar mensagem de boas-vindas
+        iniciarChat(id);
+        
+        // Enviar mensagem automática (exceto para DETRAN)
+        if (tipoSite !== 'detran') {
+            setTimeout(() => {
+                enviarMensagemBoasVindas(tipoSite, nomeExibido);
+            }, 1500);
+        }
+        
+        monitorarPopup(id);
+    }
+
+    function iniciarTimer(expiraEm) {
+        const timerDisplay = document.getElementById('timerDisplay');
+        const timerWarning = document.getElementById('timerWarning');
+        if (!timerDisplay) return;
+        
+        function atualizarTimer() {
+            const diff = expiraEm - Date.now();
+            if (diff <= 0) {
+                timerDisplay.innerHTML = '00:00:00';
+                timerWarning.innerHTML = 'Sistema encerrado';
+                timerWarning.classList.add('urgent');
+                if (timerInterval) clearInterval(timerInterval);
+                return;
+            }
+            
+            const horas = Math.floor(diff / 3600000);
+            const minutos = Math.floor((diff % 3600000) / 60000);
+            const segundos = Math.floor((diff % 60000) / 1000);
+            
+            timerDisplay.innerHTML = `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+            
+            if (diff < 3600000) {
+                timerWarning.innerHTML = 'Menos de 1 hora restante';
+                timerWarning.classList.add('urgent');
+                timerDisplay.style.color = '#c95a4a';
+            } else if (diff < 7200000) {
+                timerWarning.innerHTML = 'Menos de 2 horas restantes';
+                timerWarning.classList.add('urgent');
+            } else {
+                timerWarning.innerHTML = 'Sistema será encerrado automaticamente';
+                timerWarning.classList.remove('urgent');
+                timerDisplay.style.color = '#2c3e44';
+            }
+        }
+        
+        atualizarTimer();
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(atualizarTimer, 1000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>
+</body>
+</html>
