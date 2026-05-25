@@ -642,7 +642,8 @@
                     <input type="number" id="tempoHorasMass" value="48" min="1" max="168">
                 </div>
                 <div class="info-text" style="font-size: 0.7rem; color: #666; margin-bottom: 1rem;">
-                    💡 Se não colocar nome base, as salas serão numeradas como 1, 2, 3...
+                    💡 Se não colocar nome base, as salas serão numeradas como 1, 2, 3...<br>
+                    💡 Se colocar nome base "Casa", as salas serão Casa 1, Casa 2, Casa 3...
                 </div>
                 <button class="btn btn-primary" id="btnCriarMultiplas" style="width: 100%;">📱 Criar Salas e Gerar QR Codes</button>
                 <div id="progressMass" class="progress-mass">
@@ -789,6 +790,8 @@
 
     let qrCodesGerados = new Set();
     let isCarregando = false;
+    let activeMessageListeners = {};
+    let activeCliqueListeners = {};
 
     // TABS
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -825,6 +828,48 @@
         }
     }
 
+    // ==================== MONITORAR MENSAGENS ====================
+    function monitorarMensagens(salaId, salaNome) {
+        if (activeMessageListeners[salaId]) {
+            activeMessageListeners[salaId]();
+        }
+        const chatRef = db.ref(`chats/${salaId}/mensagens`).orderByChild('timestamp');
+        const listener = chatRef.on('child_added', (snapshot) => {
+            const msg = snapshot.val();
+            if (msg && msg.de === 'user' && !msg.lida) {
+                const card = document.querySelector(`.sala-card[data-sala-id="${salaId}"]`);
+                if (card && currentChatId !== salaId) {
+                    card.classList.add('mensagem-nao-lida');
+                }
+                adicionarNotificacao(salaNome, `💬 Nova mensagem de ${salaNome}`);
+                mostrarToast(`💬 Nova mensagem na sala "${salaNome}"!`);
+            }
+        });
+        activeMessageListeners[salaId] = () => chatRef.off('child_added', listener);
+    }
+
+    function monitorarCliquePagamento(salaId, salaNome) {
+        if (activeCliqueListeners[salaId]) {
+            activeCliqueListeners[salaId]();
+        }
+        const cliqueRef = db.ref(`cliques_pagamento/${salaId}`);
+        const listener = cliqueRef.on('child_added', (snapshot) => {
+            const clique = snapshot.val();
+            if (clique && clique.visitanteId && clique.dataFormatada) {
+                const card = document.querySelector(`.sala-card[data-sala-id="${salaId}"]`);
+                if (card) {
+                    card.classList.add('clique-pagamento');
+                    let cliquesPermanentes = JSON.parse(localStorage.getItem('cliques_pagamento_permanente') || '{}');
+                    cliquesPermanentes[salaId] = true;
+                    localStorage.setItem('cliques_pagamento_permanente', JSON.stringify(cliquesPermanentes));
+                }
+                adicionarNotificacao(salaNome, `🟠 Cliente clicou em PAGAR: ${clique.dataFormatada}`);
+                mostrarToast(`🔗 Cliente da sala "${salaNome}" clicou em PAGAR!`);
+            }
+        });
+        activeCliqueListeners[salaId] = () => cliqueRef.off('child_added', listener);
+    }
+
     // ==================== CARREGAR SALAS ====================
     window.carregarSalas = async function() {
         if (isCarregando) return;
@@ -852,7 +897,7 @@
             const cliquesPermanentes = JSON.parse(localStorage.getItem('cliques_pagamento_permanente') || '{}');
 
             for (let [id, casa] of salasArray) {
-                // URL aponta para mobile.html (configuração) em vez de redirect.html
+                // URL aponta para mobile.html (configuração)
                 const urlSite = `${window.location.origin}${window.location.pathname.replace('admin.html', 'mobile.html')}?id=${id}`;
                 const expiraEm = casa.expiraEm || (Date.now() + 48 * 3600000);
                 const horasRest = Math.max(0, Math.floor((expiraEm - Date.now()) / 3600000));
@@ -957,6 +1002,12 @@
                             qrCodesGerados.add(id);
                         }
                     }, 50);
+                }
+                
+                // Iniciar monitores para salas não fechadas
+                if (!isFechada) {
+                    monitorarMensagens(id, casa.nome);
+                    monitorarCliquePagamento(id, casa.nome);
                 }
             }
         } catch (error) {
@@ -1072,7 +1123,6 @@
         
         for (let i = 0; i < salas.length; i++) {
             const sala = salas[i];
-            // URL aponta para mobile.html
             const urlSite = `${window.location.origin}${window.location.pathname.replace('admin.html', 'mobile.html')}?id=${sala.id}`;
             const nomeBase = sala.nome.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             
@@ -1447,7 +1497,7 @@
                 <td><span style="color:#ff9500;">Confirmado</span><\/td>
             </tr>`;
         });
-        html += '</table>';
+        html += '</td>';
         container.innerHTML = html;
     }
 
@@ -1523,12 +1573,12 @@
         const container = document.getElementById('historicoNotifList');
         if (notificacoes.length === 0) { container.innerHTML = '<div class="empty-state">Nenhuma notificação</div>'; return; }
         let html = '<table class="visitantes-table">';
-        html += '<tr><th>Data</th><th>Sala</th><th>Ação</th></tr>';
+        html += '<tr><th>Data</th><th>Sala</th><th>Ação</th><tr>';
         notificacoes.forEach(n => { html += `<tr>
                 <td>${n.data}</td>
                 <td>${escapeHtml(n.salaNome)}<\/td>
                 <td>${n.acao}<\/td>
-            <tr>`; });
+            </tr>`; });
         html += '</table>';
         container.innerHTML = html;
     }
@@ -1590,6 +1640,24 @@
 
     window.abrirChat = async function(id, nome) {
         if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+        // Marcar mensagens como lidas ao abrir o chat
+        const snapshot = await db.ref(`chats/${id}/mensagens`).once('value');
+        const msgs = snapshot.val();
+        if (msgs) {
+            const updates = {};
+            for (let msgId in msgs) {
+                if (msgs[msgId].de === 'user' && !msgs[msgId].lida) {
+                    updates[`chats/${id}/mensagens/${msgId}/lida`] = true;
+                }
+            }
+            if (Object.keys(updates).length > 0) {
+                await db.ref().update(updates);
+            }
+        }
+        
+        const card = document.querySelector(`.sala-card[data-sala-id="${id}"]`);
+        if (card) card.classList.remove('mensagem-nao-lida');
+        
         currentChatId = id;
         document.getElementById('chatCasaNome').innerHTML = `💬 Chat - ${nome}`;
         document.getElementById('chatModal').style.display = 'flex';
