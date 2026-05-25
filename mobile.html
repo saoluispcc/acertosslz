@@ -2,640 +2,179 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Mobile | Configurar Sala</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Configurar Sala</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f5f5f5;
-            min-height: 100vh;
-            padding: 1rem;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #007aff, #5856d6);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .header p {
-            font-size: 0.875rem;
-            color: #666;
-            margin-top: 0.25rem;
-        }
-
-        .info-card {
-            background: #e3f2fd;
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            border-left: 4px solid #007aff;
-        }
-
-        .info-card .label {
-            font-size: 0.7rem;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .info-card .value {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #007aff;
-            word-break: break-all;
-            margin-top: 0.25rem;
-            font-family: monospace;
-        }
-
-        .error-card {
-            background: #ffebee;
-            border-radius: 1rem;
-            padding: 1.5rem;
-            text-align: center;
-            border-left: 4px solid #f44336;
-        }
-
-        .error-card .label {
-            font-size: 0.9rem;
-            color: #c62828;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .error-card .value {
-            font-size: 0.8rem;
-            color: #666;
-        }
-
-        .progress-container {
-            margin-bottom: 2rem;
-        }
-
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .progress-step {
-            flex: 1;
-            text-align: center;
-            font-size: 0.6rem;
-            color: #ccc;
-            font-weight: 500;
-        }
-
-        .progress-step.active {
-            color: #007aff;
-        }
-
-        .progress-step.completed {
-            color: #34c759;
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: #e0e0e0;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            width: 0%;
-            background: #007aff;
-            transition: width 0.3s ease;
-            border-radius: 2px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .card-header {
-            padding: 1.25rem;
-            background: white;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .card-header h2 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1e1e1e;
-        }
-
-        .card-header p {
-            font-size: 0.75rem;
-            color: #888;
-            margin-top: 0.25rem;
-        }
-
-        .card-body {
-            padding: 1.25rem;
-        }
-
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 1rem;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 1rem;
-            font-size: 1rem;
-            transition: all 0.2s;
-            background: #fafafa;
-            font-family: inherit;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: #007aff;
-            background: white;
-        }
-
-        .btn {
-            padding: 1rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 1rem;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: #007aff;
-            color: white;
-        }
-
-        .btn-primary:active {
-            background: #005fcb;
-            transform: scale(0.98);
-        }
-
-        .btn-secondary {
-            background: #e9ecef;
-            color: #495057;
-        }
-
-        .info-text {
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 0.5rem;
-            word-break: break-all;
-            background: #f8f9fa;
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-        }
-
-        .step-content {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .step-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: #999;
-        }
-
-        .senha-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 80vh;
-        }
-
-        .senha-card {
-            background: white;
-            border-radius: 1.5rem;
-            padding: 2rem;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-            text-align: center;
-        }
-
-        .senha-card h2 {
-            font-size: 1.25rem;
-            margin-bottom: 0.5rem;
-            color: #1e1e1e;
-        }
-
-        .senha-card p {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 1.5rem;
-        }
-
-        .senha-input {
-            width: 100%;
-            padding: 1rem;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 1rem;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-
-        .senha-input:focus {
-            outline: none;
-            border-color: #007aff;
-        }
-
-        .senha-erro {
-            color: #f44336;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            display: none;
-        }
-
-        .tipo-site-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .tipo-site-btn {
-            flex: 1;
-            padding: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 1rem;
-            background: white;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .tipo-site-btn.selected {
-            border-color: #007aff;
-            background: #e3f2fd;
-        }
-
-        .fotos-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .foto-slot {
-            aspect-ratio: 1;
-            background: #f8f9fa;
-            border: 1.5px dashed #ccc;
-            border-radius: 1rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .foto-slot img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .remove-foto {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-
-        .msg-item {
-            background: #f8f9fa;
-            border: 1.5px solid #e9ecef;
-            border-radius: 1rem;
-            padding: 1rem;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            cursor: pointer;
-            margin-bottom: 0.75rem;
-        }
-
-        .msg-item.selected {
-            background: #e3f2fd;
-            border-color: #007aff;
-        }
-
-        .msg-check {
-            width: 24px;
-            height: 24px;
-            border: 2px solid #ccc;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .msg-text {
-            flex: 1;
-            font-size: 0.875rem;
-            color: #333;
-        }
-
-        .counter {
-            font-size: 0.7rem;
-            color: #888;
-            text-align: center;
-            margin-top: 0.5rem;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .success-icon {
-            width: 64px;
-            height: 64px;
-            background: #34c759;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; min-height: 100vh; padding: 1rem; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 1.5rem; }
+        .header h1 { font-size: 1.75rem; font-weight: 700; color: #007aff; }
+        .header p { font-size: 0.875rem; color: #666; }
+        .info-card { background: #e3f2fd; border-radius: 1rem; padding: 1rem; margin-bottom: 1.5rem; text-align: center; border-left: 4px solid #007aff; }
+        .info-card .label { font-size: 0.7rem; color: #666; text-transform: uppercase; }
+        .info-card .value { font-size: 1rem; font-weight: 600; color: #007aff; word-break: break-all; margin-top: 0.25rem; font-family: monospace; }
+        .error-card { background: #ffebee; border-radius: 1rem; padding: 1.5rem; text-align: center; border-left: 4px solid #f44336; }
+        .error-card .label { font-size: 0.9rem; color: #c62828; font-weight: 600; }
+        .progress-container { margin-bottom: 2rem; }
+        .progress-steps { display: flex; justify-content: space-between; margin-bottom: 0.5rem; flex-wrap: wrap; }
+        .progress-step { flex: 1; text-align: center; font-size: 0.6rem; color: #ccc; font-weight: 500; }
+        .progress-step.active { color: #007aff; }
+        .progress-step.completed { color: #34c759; }
+        .progress-bar { height: 4px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; background: #007aff; transition: width 0.3s ease; }
+        .card { background: white; border-radius: 1.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 1rem; }
+        .card-header { padding: 1.25rem; border-bottom: 1px solid #f0f0f0; }
+        .card-header h2 { font-size: 1.25rem; font-weight: 600; color: #1e1e1e; }
+        .card-header p { font-size: 0.75rem; color: #888; margin-top: 0.25rem; }
+        .card-body { padding: 1.25rem; }
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label { display: block; font-size: 0.875rem; font-weight: 500; color: #333; margin-bottom: 0.5rem; }
+        .form-group input, .form-group select { width: 100%; padding: 1rem; border: 1.5px solid #e0e0e0; border-radius: 1rem; font-size: 1rem; background: #fafafa; }
+        .form-group input:focus { outline: none; border-color: #007aff; background: white; }
+        .btn { padding: 1rem; font-size: 1rem; font-weight: 600; border-radius: 1rem; border: none; cursor: pointer; }
+        .btn-primary { background: #007aff; color: white; }
+        .btn-secondary { background: #e9ecef; color: #495057; }
+        .info-text { font-size: 0.7rem; color: #888; margin-top: 0.5rem; background: #f8f9fa; padding: 0.75rem; border-radius: 0.75rem; }
+        .step-content { display: none; animation: fadeIn 0.3s ease; }
+        .step-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .tipo-site-buttons { display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+        .tipo-site-btn { flex: 1; padding: 1rem; border: 2px solid #e0e0e0; border-radius: 1rem; background: white; cursor: pointer; text-align: center; }
+        .tipo-site-btn.selected { border-color: #007aff; background: #e3f2fd; }
+        .fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+        .foto-slot { aspect-ratio: 1; background: #f8f9fa; border: 1.5px dashed #ccc; border-radius: 1rem; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; }
+        .foto-slot img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-foto { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6); color: white; border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer; }
+        .msg-item { background: #f8f9fa; border: 1.5px solid #e9ecef; border-radius: 1rem; padding: 1rem; display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; margin-bottom: 0.75rem; }
+        .msg-item.selected { background: #e3f2fd; border-color: #007aff; }
+        .msg-check { width: 24px; height: 24px; border: 2px solid #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .msg-text { flex: 1; font-size: 0.875rem; color: #333; }
+        .counter { font-size: 0.7rem; color: #888; text-align: center; margin-top: 0.5rem; }
+        .nav-buttons { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+        .success-icon { width: 64px; height: 64px; background: #34c759; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
         <h1>📱 Configurar Sala</h1>
-        <p>Acesso restrito</p>
+        <p>Preencha os dados da sala</p>
     </div>
 
-    <div id="telaSenha" class="senha-container">
-        <div class="senha-card">
-            <h2>🔐 Acesso Autorizado</h2>
-            <p>Digite a senha para continuar</p>
-            <input type="password" id="senhaInput" class="senha-input" placeholder="Digite a senha" autocomplete="off">
-            <button class="btn btn-primary" id="btnVerificarSenha" style="width: 100%;">Entrar</button>
-            <div id="senhaErro" class="senha-erro">❌ Senha incorreta! Tente novamente.</div>
-        </div>
+    <div id="salaInfoCard" class="info-card" style="display: none;">
+        <div class="label">QR CODE ESCANEADO - ID DA SALA</div>
+        <div class="value" id="salaIdDisplay">---</div>
+        <div class="label" style="margin-top: 0.5rem;">NOME DA SALA</div>
+        <div class="value" id="salaNomeDisplay" style="font-size: 0.9rem;">---</div>
     </div>
 
-    <div id="conteudoPrincipal" style="display: none;">
-        <div id="salaInfoCard" class="info-card" style="display: none;">
-            <div class="label">QR CODE ESCANEADO - ID DA SALA</div>
-            <div class="value" id="salaIdDisplay">---</div>
-            <div class="label" style="margin-top: 0.5rem;">NOME DA SALA</div>
-            <div class="value" id="salaNomeDisplay" style="font-size: 0.9rem;">---</div>
+    <div id="errorCard" class="error-card" style="display: none;">
+        <div class="label" id="errorTitle">⚠️ Ação não permitida</div>
+        <div class="value" id="errorMessage">Esta sala já está configurada ou fechada.</div>
+        <button class="btn btn-secondary" id="btnVoltarInicio" style="margin-top: 1rem; width:100%;">← Voltar</button>
+    </div>
+
+    <div id="configForm" style="display: none;">
+        <div class="progress-container">
+            <div class="progress-steps">
+                <div class="progress-step" id="stepLabel1">1. Tipo</div>
+                <div class="progress-step" id="stepLabel2">2. Identificador</div>
+                <div class="progress-step" id="stepLabel3">3. Fotos</div>
+                <div class="progress-step" id="stepLabel4">4. Mensagens</div>
+                <div class="progress-step" id="stepLabel5">5. Pagamento</div>
+                <div class="progress-step" id="stepLabel6">6. Tema</div>
+                <div class="progress-step" id="stepLabel7">7. Tempo</div>
+                <div class="progress-step" id="stepLabel8">8. Concluir</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
         </div>
 
-        <div id="errorCard" class="error-card" style="display: none;">
-            <div class="label" id="errorTitle">⚠️ Ação não permitida</div>
-            <div class="value" id="errorMessage">Esta sala já está configurada ou fechada.</div>
-            <button class="btn btn-secondary" id="btnVoltarInicio" style="margin-top: 1rem;">← Voltar</button>
+        <div id="step1" class="step-content active">
+            <div class="card">
+                <div class="card-header"><h2>Qual o tipo de site?</h2><p>Escolha o estilo visual que será exibido</p></div>
+                <div class="card-body">
+                    <div class="tipo-site-buttons">
+                        <div class="tipo-site-btn" data-tipo="normal" id="tipoNormal"><div style="font-size:1.5rem;">🏠</div><div style="font-weight:600;">Normal</div><div style="font-size:0.7rem; color:#666;">Sala padrão</div></div>
+                        <div class="tipo-site-btn" data-tipo="detran" id="tipoDetran"><div style="font-size:1.5rem;">🚔</div><div style="font-weight:600;">DETRAN</div><div style="font-size:0.7rem; color:#666;">Multas</div></div>
+                        <div class="tipo-site-btn" data-tipo="pessoa" id="tipoPessoa"><div style="font-size:1.5rem;">🆘</div><div style="font-weight:600;">Pessoa</div><div style="font-size:0.7rem; color:#666;">Segurança</div></div>
+                    </div>
+                    <button class="btn btn-primary" id="btnProximo1" style="width:100%; margin-top:1rem;">Continuar →</button>
+                </div>
+            </div>
         </div>
 
-        <div id="configForm" style="display: none;">
-            <div class="progress-container">
-                <div class="progress-steps">
-                    <div class="progress-step" id="stepLabel1">1. Tipo</div>
-                    <div class="progress-step" id="stepLabel2">2. Identificador</div>
-                    <div class="progress-step" id="stepLabel3">3. Fotos</div>
-                    <div class="progress-step" id="stepLabel4">4. Mensagens</div>
-                    <div class="progress-step" id="stepLabel5">5. Pagamento</div>
-                    <div class="progress-step" id="stepLabel6">6. Tema</div>
-                    <div class="progress-step" id="stepLabel7">7. Tempo</div>
-                    <div class="progress-step" id="stepLabel8">8. Concluir</div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill"></div>
+        <div id="step2" class="step-content">
+            <div class="card">
+                <div class="card-header"><h2 id="step2Title">Qual o número da sala?</h2><p id="step2Desc">Digite um identificador</p></div>
+                <div class="card-body">
+                    <div class="form-group"><label id="step2Label">Número / Nome</label><input type="text" id="identificadorSala" placeholder="Ex: 101, Apto 42" autocomplete="off"></div>
+                    <div class="nav-buttons"><button class="btn btn-secondary" id="btnVoltar2" style="flex:1;">← Voltar</button><button class="btn btn-primary" id="btnProximo2" style="flex:1;">Continuar →</button></div>
                 </div>
             </div>
+        </div>
 
-            <div id="step1" class="step-content active">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Qual o tipo de site?</h2>
-                        <p>Escolha o estilo visual que será exibido</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="tipo-site-buttons">
-                            <div class="tipo-site-btn" data-tipo="normal" id="tipoNormal">
-                                <div style="font-size: 1.5rem;">🏠</div>
-                                <div style="font-weight: 600;">Normal</div>
-                                <div style="font-size: 0.7rem; color: #666;">Sala padrão</div>
-                            </div>
-                            <div class="tipo-site-btn" data-tipo="detran" id="tipoDetran">
-                                <div style="font-size: 1.5rem;">🚔</div>
-                                <div style="font-weight: 600;">DETRAN</div>
-                                <div style="font-size: 0.7rem; color: #666;">Multas e infrações</div>
-                            </div>
-                            <div class="tipo-site-btn" data-tipo="pessoa" id="tipoPessoa">
-                                <div style="font-size: 1.5rem;">🆘</div>
-                                <div style="font-weight: 600;">Pessoa</div>
-                                <div style="font-size: 0.7rem; color: #666;">Segurança / Emergência</div>
-                            </div>
-                        </div>
-                        <button class="btn btn-primary" id="btnProximo1" style="width: 100%; margin-top: 1rem;">Continuar →</button>
-                    </div>
+        <div id="step3" class="step-content">
+            <div class="card">
+                <div class="card-header"><h2>📸 Adicione fotos</h2><p>Até 5 fotos</p></div>
+                <div class="card-body">
+                    <div class="fotos-grid" id="fotosGrid"></div>
+                    <div class="counter" id="fotosCounter">0 de 5 fotos</div>
+                    <div class="nav-buttons"><button class="btn btn-secondary" id="btnVoltar3" style="flex:1;">← Voltar</button><button class="btn btn-primary" id="btnProximo3" style="flex:1;">Continuar →</button></div>
                 </div>
             </div>
+        </div>
 
-            <div id="step2" class="step-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2 id="step2Title">Qual o número da sala?</h2>
-                        <p id="step2Desc">Digite um identificador para esta sala</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label id="step2Label">Número / Nome da Sala</label>
-                            <input type="text" id="identificadorSala" placeholder="Ex: 101, Apto 42, Loja 1" autocomplete="off">
-                        </div>
-                        <div class="nav-buttons">
-                            <button class="btn btn-secondary" id="btnVoltar2" style="flex:1;">← Voltar</button>
-                            <button class="btn btn-primary" id="btnProximo2" style="flex:1;">Continuar →</button>
-                        </div>
-                    </div>
+        <div id="step4" class="step-content">
+            <div class="card">
+                <div class="card-header"><h2>💬 Selecione as mensagens</h2><p>Até 5 mensagens</p></div>
+                <div class="card-body">
+                    <div id="mensagensList"></div>
+                    <div class="counter" id="msgsCounter">0 de 5 mensagens</div>
+                    <div class="nav-buttons"><button class="btn btn-secondary" id="btnVoltar4" style="flex:1;">← Voltar</button><button class="btn btn-primary" id="btnProximo4" style="flex:1;">Continuar →</button></div>
                 </div>
             </div>
+        </div>
 
-            <div id="step3" class="step-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>📸 Adicione fotos</h2>
-                        <p>Selecione até 5 fotos para esta sala</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="fotos-grid" id="fotosGrid"></div>
-                        <div class="counter" id="fotosCounter">0 de 5 fotos selecionadas</div>
-                        <div class="nav-buttons">
-                            <button class="btn btn-secondary" id="btnVoltar3" style="flex:1;">← Voltar</button>
-                            <button class="btn btn-primary" id="btnProximo3" style="flex:1;">Continuar →</button>
-                        </div>
-                    </div>
+        <div id="step5" class="step-content">
+            <div class="card">
+                <div class="card-header"><h2>💰 Código de Pagamento</h2><p>PIX ou link</p></div>
+                <div class="card-body">
+                    <div class="form-group"><label>Chave PIX / Link</label><input type="text" id="codigoPagamento" placeholder="Ex: email@email.com" autocomplete="off"></div>
+                    <div class="nav-buttons"><button class="btn btn-secondary" id="btnVoltar5" style="flex:1;">← Voltar</button><button class="btn btn-primary" id="btnProximo5" style="flex:1;">Continuar →</button></div>
                 </div>
             </div>
+        </div>
 
-            <div id="step4" class="step-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>💬 Selecione as mensagens</h2>
-                        <p>Escolha até 5 mensagens</p>
-                    </div>
-                    <div class="card-body">
-                        <div id="mensagensList"></div>
-                        <div class="counter" id="msgsCounter">0 de 5 mensagens selecionadas</div>
-                        <div class="nav-buttons">
-                            <button class="btn btn-secondary" id="btnVoltar4" style="flex:1;">← Voltar</button>
-                            <button class="btn btn-primary" id="btnProximo4" style="flex:1;">Continuar →</button>
-                        </div>
-                    </div>
+        <div id="step6" class="step-content">
+            <div class="card">
+                <div class="card-header"><h2>🎨 Escolha o tema</h2><p>Estilo visual</p></div>
+                <div class="card-body">
+                    <div class="form-group"><label>Tema</label><select id="temaSala"><option value="light">🌞 Claro</option><option value="dark">🌑 Dark</option></select></div>
+                    <div class="nav-buttons"><button class="btn btn-secondary" id="btnVoltar6" style="flex:1;">← Voltar</button><button class="btn btn-primary" id="btnProximo6" style="flex:1;">Continuar →</button></div>
                 </div>
             </div>
+        </div>
 
-            <div id="step5" class="step-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>💰 Código de Pagamento</h2>
-                        <p>Digite o código/PIX que o cliente usará para pagar</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Código / Chave PIX / Link de pagamento</label>
-                            <input type="text" id="codigoPagamento" placeholder="Ex: 123456789, email@email.com, https://pagamento.com/..." autocomplete="off">
-                        </div>
-                        <div class="nav-buttons">
-                            <button class="btn btn-secondary" id="btnVoltar5" style="flex:1;">← Voltar</button>
-                            <button class="btn btn-primary" id="btnProximo5" style="flex:1;">Continuar →</button>
-                        </div>
-                    </div>
+        <div id="step7" class="step-content">
+            <div class="card">
+                <div class="card-header"><h2>⏱️ Tempo da Sala</h2><p>Horas de atividade</p></div>
+                <div class="card-body">
+                    <div class="form-group"><label>Tempo (horas)</label><input type="number" id="tempoHoras" value="48" min="1" max="168"></div>
+                    <div class="nav-buttons"><button class="btn btn-secondary" id="btnVoltar7" style="flex:1;">← Voltar</button><button class="btn btn-primary" id="btnProximo7" style="flex:1;">Continuar →</button></div>
                 </div>
             </div>
+        </div>
 
-            <div id="step6" class="step-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>🎨 Escolha o tema da sala</h2>
-                        <p>Selecione o estilo visual que os clientes verão</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Tema</label>
-                            <select id="temaSala" style="width:100%; padding:1rem; border-radius:1rem; border:1.5px solid #e0e0e0;">
-                                <option value="light">🌞 Claro (Moderno)</option>
-                                <option value="dark">🌑 Dark (Vermelho/Sombrio)</option>
-                            </select>
-                        </div>
-                        <div class="nav-buttons">
-                            <button class="btn btn-secondary" id="btnVoltar6" style="flex:1;">← Voltar</button>
-                            <button class="btn btn-primary" id="btnProximo6" style="flex:1;">Continuar →</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="step7" class="step-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>⏱️ Tempo da Sala</h2>
-                        <p>Defina por quantas horas a sala ficará ativa</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Tempo (horas)</label>
-                            <input type="number" id="tempoHoras" value="48" min="1" max="168" step="1">
-                        </div>
-                        <div class="nav-buttons">
-                            <button class="btn btn-secondary" id="btnVoltar7" style="flex:1;">← Voltar</button>
-                            <button class="btn btn-primary" id="btnProximo7" style="flex:1;">Continuar →</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="step8" class="step-content">
-                <div class="card">
-                    <div class="card-header">
-                        <h2>Sala configurada com sucesso!</h2>
-                        <p>Agora os clientes podem acessar</p>
-                    </div>
-                    <div class="card-body">
-                        <div class="success-icon">
-                            <div style="font-size:2.5rem; color:white; font-weight:bold;">✓</div>
-                        </div>
-                        <div id="resumoInfo" class="info-text"></div>
-                        <div class="nav-buttons">
-                            <button class="btn btn-primary" id="btnFinalizar" style="flex:1;">✅ Concluir</button>
-                        </div>
-                    </div>
+        <div id="step8" class="step-content">
+            <div class="card">
+                <div class="card-header"><h2>Sala configurada!</h2><p>Sucesso</p></div>
+                <div class="card-body">
+                    <div class="success-icon"><div style="font-size:2.5rem; color:white; font-weight:bold;">✓</div></div>
+                    <div id="resumoInfo" class="info-text"></div>
+                    <div class="nav-buttons"><button class="btn btn-primary" id="btnFinalizar" style="flex:1;">✅ Concluir</button></div>
                 </div>
             </div>
         </div>
@@ -643,16 +182,13 @@
 </div>
 
 <script>
-    const firebaseConfig = {
-        databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/"
-    };
+    const firebaseConfig = { databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const SENHA_CORRETA = "Dellplay321#";
-
-    let salaId = '';
-    let salaOriginal = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const salaId = urlParams.get('id');
+    
     let tipoSiteSelecionado = 'normal';
     let identificador = '';
     let fotosBase64 = [];
@@ -664,75 +200,49 @@
     let currentStep = 1;
     let isUpdating = false;
 
-    function verificarSenha() {
-        const senhaDigitada = document.getElementById('senhaInput').value;
-        const erroDiv = document.getElementById('senhaErro');
-        
-        if (senhaDigitada === SENHA_CORRETA) {
-            sessionStorage.setItem('senha_autorizada', 'true');
-            document.getElementById('telaSenha').style.display = 'none';
-            document.getElementById('conteudoPrincipal').style.display = 'block';
-            iniciar();
-        } else {
-            erroDiv.style.display = 'block';
-            document.getElementById('senhaInput').value = '';
-            document.getElementById('senhaInput').focus();
-        }
+    if (!salaId) {
+        document.getElementById('errorCard').style.display = 'block';
+        document.getElementById('errorTitle').innerText = 'Erro';
+        document.getElementById('errorMessage').innerText = 'Nenhum ID de sala encontrado. Escaneie um QR Code válido.';
+    } else {
+        carregarSala();
     }
 
-    function verificarSessao() {
-        if (sessionStorage.getItem('senha_autorizada') === 'true') {
-            document.getElementById('telaSenha').style.display = 'none';
-            document.getElementById('conteudoPrincipal').style.display = 'block';
-            iniciar();
-        }
-    }
-
-    function getSalaIdFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const id = urlParams.get('id');
-        if (id) {
-            salaId = id;
-            return true;
-        }
-        return false;
-    }
-
-    async function verificarSalaParaConfiguracao() {
-        if (!salaId) return false;
-        
+    async function carregarSala() {
         try {
             const snapshot = await db.ref(`casas/${salaId}`).once('value');
             const sala = snapshot.val();
             
             if (!sala) {
-                mostrarErro("Sala não encontrada", "Verifique se o QR Code é válido.");
-                return false;
+                mostrarErro("Sala não encontrada", "QR Code inválido.");
+                return;
             }
             
             if (sala.status === 'fechada') {
-                mostrarErro("Sala fechada", "Esta sala já foi finalizada e não pode ser reconfigurada.");
-                return false;
+                mostrarErro("Sala fechada", "Esta sala já foi finalizada.");
+                return;
             }
             
             const jaConfigurada = (sala.mensagens && sala.mensagens.length > 0) || (sala.fotos && sala.fotos.length > 0);
             
             if (jaConfigurada) {
-                mostrarErro("Sala já configurada", "Esta sala já foi preenchida. Se precisar reconfigurar, solicite ao administrador que reabra a sala.");
-                return false;
+                mostrarErro("Sala já configurada", "Esta sala já foi preenchida.");
+                return;
             }
-            
-            salaOriginal = sala;
             
             document.getElementById('salaIdDisplay').innerText = salaId;
             document.getElementById('salaNomeDisplay').innerText = sala.nome || 'Sala sem nome';
             document.getElementById('salaInfoCard').style.display = 'block';
+            document.getElementById('configForm').style.display = 'block';
             
-            return true;
+            initTipoSiteButtons();
+            setupFotosGrid();
+            await carregarMensagensPredefinidas();
+            mostrarEtapa(1);
+            
         } catch (error) {
-            console.error('Erro ao verificar sala:', error);
-            mostrarErro("Erro de conexão", "Não foi possível verificar a sala. Tente novamente.");
-            return false;
+            console.error('Erro:', error);
+            mostrarErro("Erro de conexão", "Tente novamente.");
         }
     }
 
@@ -745,73 +255,43 @@
     }
 
     function initTipoSiteButtons() {
-        const normalBtn = document.getElementById('tipoNormal');
-        const detranBtn = document.getElementById('tipoDetran');
-        const pessoaBtn = document.getElementById('tipoPessoa');
+        const normal = document.getElementById('tipoNormal');
+        const detran = document.getElementById('tipoDetran');
+        const pessoa = document.getElementById('tipoPessoa');
         
-        function resetStyles() {
-            normalBtn.classList.remove('selected');
-            detranBtn.classList.remove('selected');
-            pessoaBtn.classList.remove('selected');
-        }
+        function reset() { [normal, detran, pessoa].forEach(b => b.classList.remove('selected')); }
         
-        normalBtn.addEventListener('click', () => {
-            resetStyles();
-            normalBtn.classList.add('selected');
-            tipoSiteSelecionado = 'normal';
-            atualizarTextosIdentificador();
-            document.getElementById('step6').style.display = 'block';
-        });
+        normal.onclick = () => { reset(); normal.classList.add('selected'); tipoSiteSelecionado = 'normal'; atualizarTextos(); document.getElementById('step6').style.display = 'block'; };
+        detran.onclick = () => { reset(); detran.classList.add('selected'); tipoSiteSelecionado = 'detran'; atualizarTextos(); document.getElementById('step6').style.display = 'none'; };
+        pessoa.onclick = () => { reset(); pessoa.classList.add('selected'); tipoSiteSelecionado = 'pessoa'; atualizarTextos(); document.getElementById('step6').style.display = 'none'; };
         
-        detranBtn.addEventListener('click', () => {
-            resetStyles();
-            detranBtn.classList.add('selected');
-            tipoSiteSelecionado = 'detran';
-            atualizarTextosIdentificador();
-            document.getElementById('step6').style.display = 'none';
-        });
-        
-        pessoaBtn.addEventListener('click', () => {
-            resetStyles();
-            pessoaBtn.classList.add('selected');
-            tipoSiteSelecionado = 'pessoa';
-            atualizarTextosIdentificador();
-            document.getElementById('step6').style.display = 'none';
-        });
-        
-        normalBtn.classList.add('selected');
+        normal.classList.add('selected');
     }
-    
-    function atualizarTextosIdentificador() {
-        const step2Title = document.getElementById('step2Title');
-        const step2Desc = document.getElementById('step2Desc');
-        const step2Label = document.getElementById('step2Label');
+
+    function atualizarTextos() {
+        const title = document.getElementById('step2Title');
+        const desc = document.getElementById('step2Desc');
+        const label = document.getElementById('step2Label');
         const input = document.getElementById('identificadorSala');
         
         if (tipoSiteSelecionado === 'detran') {
-            step2Title.innerHTML = 'Qual a placa do veículo?';
-            step2Desc.innerHTML = 'Digite a placa do veículo para consulta de infrações';
-            step2Label.innerHTML = 'Placa do Veículo';
-            input.placeholder = 'Ex: ABC1D23, XYZ9E45';
+            title.innerHTML = 'Placa do veículo?';
+            desc.innerHTML = 'Digite a placa';
+            label.innerHTML = 'Placa';
+            input.placeholder = 'ABC1234';
             input.style.textTransform = 'uppercase';
-            input.style.fontFamily = 'monospace';
-            input.style.letterSpacing = '2px';
         } else if (tipoSiteSelecionado === 'pessoa') {
-            step2Title.innerHTML = 'Nome da pessoa em situação de risco';
-            step2Desc.innerHTML = 'Digite o nome completo da pessoa que precisa de assistência';
-            step2Label.innerHTML = 'Nome Completo';
-            input.placeholder = 'Ex: Maria da Silva, João Santos';
+            title.innerHTML = 'Nome da pessoa';
+            desc.innerHTML = 'Nome completo';
+            label.innerHTML = 'Nome';
+            input.placeholder = 'Maria da Silva';
             input.style.textTransform = 'capitalize';
-            input.style.fontFamily = 'inherit';
-            input.style.letterSpacing = 'normal';
         } else {
-            step2Title.innerHTML = 'Qual o número da sala?';
-            step2Desc.innerHTML = 'Digite um identificador para esta sala';
-            step2Label.innerHTML = 'Número / Nome da Sala';
-            input.placeholder = 'Ex: 101, Apto 42, Loja 1';
+            title.innerHTML = 'Número da sala';
+            desc.innerHTML = 'Identificador';
+            label.innerHTML = 'Número';
+            input.placeholder = '101, Apto 42';
             input.style.textTransform = 'none';
-            input.style.fontFamily = 'inherit';
-            input.style.letterSpacing = 'normal';
         }
         input.value = '';
     }
@@ -820,156 +300,96 @@
         const grid = document.getElementById('fotosGrid');
         fotosBase64 = [];
         grid.innerHTML = '';
-        
         for (let i = 0; i < 5; i++) {
             const slot = document.createElement('div');
             slot.className = 'foto-slot';
-            slot.innerHTML = '<div><span style="font-size:1.5rem;">📷</span><br>Foto ' + (i + 1) + '</div>';
+            slot.innerHTML = '<div><span style="font-size:1.5rem;">📷</span><br>Foto ' + (i+1) + '</div>';
             slot.onclick = () => abrirSeletorFoto(i);
             grid.appendChild(slot);
         }
         atualizarContadorFotos();
     }
 
-    function abrirSeletorFoto(slotIndex) {
+    function abrirSeletorFoto(idx) {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
         input.onchange = (e) => {
-            if (e.target.files && e.target.files[0]) {
+            if (e.target.files[0]) {
                 const reader = new FileReader();
-                reader.onload = (event) => {
-                    adicionarFoto(slotIndex, event.target.result);
-                };
+                reader.onload = (ev) => adicionarFoto(idx, ev.target.result);
                 reader.readAsDataURL(e.target.files[0]);
             }
         };
         input.click();
     }
 
-    function adicionarFoto(slotIndex, base64) {
+    function adicionarFoto(idx, base64) {
         const grid = document.getElementById('fotosGrid');
-        const slot = grid.children[slotIndex];
-        
+        const slot = grid.children[idx];
         slot.innerHTML = '';
         const img = document.createElement('img');
         img.src = base64;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        
-        const removeBtn = document.createElement('div');
-        removeBtn.className = 'remove-foto';
-        removeBtn.innerHTML = '✕';
-        removeBtn.onclick = (e) => {
-            e.stopPropagation();
-            removerFoto(slotIndex);
-        };
-        
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+        const remove = document.createElement('div');
+        remove.className = 'remove-foto';
+        remove.innerHTML = '✕';
+        remove.onclick = (e) => { e.stopPropagation(); removerFoto(idx); };
         slot.appendChild(img);
-        slot.appendChild(removeBtn);
+        slot.appendChild(remove);
         slot.style.border = '1.5px solid #34c759';
-        
-        fotosBase64[slotIndex] = base64;
+        fotosBase64[idx] = base64;
         atualizarContadorFotos();
     }
 
-    function removerFoto(slotIndex) {
+    function removerFoto(idx) {
         const grid = document.getElementById('fotosGrid');
-        const slot = grid.children[slotIndex];
-        
-        slot.innerHTML = '<div><span style="font-size:1.5rem;">📷</span><br>Foto ' + (slotIndex + 1) + '</div>';
+        const slot = grid.children[idx];
+        slot.innerHTML = '<div><span style="font-size:1.5rem;">📷</span><br>Foto ' + (idx+1) + '</div>';
         slot.style.border = '1.5px dashed #ccc';
-        fotosBase64[slotIndex] = null;
+        fotosBase64[idx] = null;
         atualizarContadorFotos();
     }
 
-    function getFotosArray() {
-        return fotosBase64.filter(f => f !== null && f !== undefined);
-    }
-
-    function atualizarContadorFotos() {
-        const count = getFotosArray().length;
-        const counter = document.getElementById('fotosCounter');
-        if (counter) counter.innerText = `${count} de 5 fotos selecionadas`;
-    }
+    function getFotosArray() { return fotosBase64.filter(f => f); }
+    function atualizarContadorFotos() { document.getElementById('fotosCounter').innerText = `${getFotosArray().length} de 5 fotos`; }
 
     async function carregarMensagensPredefinidas() {
         try {
-            const snapshot = await db.ref('config/mensagens_predefinidas').once('value');
-            const firebaseMsgs = snapshot.val();
-            
-            if (firebaseMsgs && Array.isArray(firebaseMsgs) && firebaseMsgs.length === 5) {
-                mensagensPredefinidas = firebaseMsgs;
-            } else {
-                mensagensPredefinidas = [
-                    "🏠 Bem-vindo à sua sala!",
-                    "✨ Aproveite sua experiência",
-                    "💬 Qualquer dúvida, chame no chat",
-                    "🙏 Obrigado pela visita!",
-                    "⭐ Volte sempre!"
-                ];
-            }
+            const snap = await db.ref('config/mensagens_predefinidas').once('value');
+            mensagensPredefinidas = snap.val() || ["🏠 Bem-vindo!", "✨ Aproveite", "💬 Dúvidas? Chame", "🙏 Obrigado", "⭐ Volte sempre!"];
             renderizarMensagens();
-        } catch (error) {
-            console.error('Erro ao carregar mensagens:', error);
-            mensagensPredefinidas = [
-                "🏠 Bem-vindo à sua sala!",
-                "✨ Aproveite sua experiência",
-                "💬 Qualquer dúvida, chame no chat",
-                "🙏 Obrigado pela visita!",
-                "⭐ Volte sempre!"
-            ];
-            renderizarMensagens();
-        }
+        } catch(e) { console.error(e); }
     }
 
     function renderizarMensagens() {
         const container = document.getElementById('mensagensList');
         if (!container) return;
-        
         container.innerHTML = '';
-        
-        mensagensPredefinidas.forEach((msg, index) => {
-            const isSelected = mensagensSelecionadas.includes(index);
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'msg-item' + (isSelected ? ' selected' : '');
-            msgDiv.innerHTML = `
-                <div class="msg-check">${isSelected ? '✓' : ''}</div>
-                <div class="msg-text">${escapeHtml(msg)}</div>
-            `;
-            msgDiv.onclick = () => toggleMensagem(index);
-            container.appendChild(msgDiv);
+        mensagensPredefinidas.forEach((msg, idx) => {
+            const isSel = mensagensSelecionadas.includes(idx);
+            const div = document.createElement('div');
+            div.className = 'msg-item' + (isSel ? ' selected' : '');
+            div.innerHTML = `<div class="msg-check">${isSel ? '✓' : ''}</div><div class="msg-text">${escapeHtml(msg)}</div>`;
+            div.onclick = () => toggleMensagem(idx);
+            container.appendChild(div);
         });
-        
         atualizarContadorMsgs();
     }
 
-    function toggleMensagem(index) {
-        const wasSelected = mensagensSelecionadas.includes(index);
-        
-        if (wasSelected) {
-            mensagensSelecionadas = mensagensSelecionadas.filter(i => i !== index);
-        } else {
-            if (mensagensSelecionadas.length < 5) {
-                mensagensSelecionadas.push(index);
-            } else {
-                alert("Você pode selecionar no máximo 5 mensagens");
-                return;
-            }
-        }
+    function toggleMensagem(idx) {
+        if (mensagensSelecionadas.includes(idx)) {
+            mensagensSelecionadas = mensagensSelecionadas.filter(i => i !== idx);
+        } else if (mensagensSelecionadas.length < 5) {
+            mensagensSelecionadas.push(idx);
+        } else { alert("Máximo 5 mensagens"); return; }
         renderizarMensagens();
     }
 
-    function atualizarContadorMsgs() {
-        const counter = document.getElementById('msgsCounter');
-        if (counter) counter.innerText = `${mensagensSelecionadas.length} de 5 mensagens selecionadas`;
-    }
+    function atualizarContadorMsgs() { document.getElementById('msgsCounter').innerText = `${mensagensSelecionadas.length} de 5 mensagens`; }
 
     function atualizarProgresso() {
-        const fillWidth = ((currentStep - 1) / 7) * 100;
-        document.getElementById('progressFill').style.width = `${fillWidth}%`;
-        
+        document.getElementById('progressFill').style.width = ((currentStep - 1) / 7 * 100) + '%';
         for (let i = 1; i <= 8; i++) {
             const label = document.getElementById(`stepLabel${i}`);
             if (label) {
@@ -981,104 +401,47 @@
     }
 
     function mostrarEtapa(step) {
-        for (let i = 1; i <= 8; i++) {
-            const el = document.getElementById(`step${i}`);
-            if (el) el.classList.remove('active');
-        }
-        const activeEl = document.getElementById(`step${currentStep}`);
-        if (activeEl) activeEl.classList.add('active');
+        for (let i = 1; i <= 8; i++) document.getElementById(`step${i}`)?.classList.remove('active');
+        document.getElementById(`step${currentStep}`)?.classList.add('active');
         atualizarProgresso();
     }
 
     function validarEtapa2() {
         identificador = document.getElementById('identificadorSala').value.trim();
-        if (tipoSiteSelecionado === 'detran') {
-            identificador = identificador.toUpperCase();
-        }
-        if (!identificador) {
-            if (tipoSiteSelecionado === 'detran') alert("Digite a placa do veículo");
-            else if (tipoSiteSelecionado === 'pessoa') alert("Digite o nome da pessoa");
-            else alert("Digite o número/identificador da sala");
-            return false;
-        }
+        if (tipoSiteSelecionado === 'detran') identificador = identificador.toUpperCase();
+        if (!identificador) { alert("Preencha o campo"); return false; }
         if (tipoSiteSelecionado === 'detran') {
             const placaRegex = /^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$|^[A-Z]{3}[0-9]{4}$/i;
-            if (!placaRegex.test(identificador)) {
-                alert("Digite uma placa válida (ex: ABC1234 ou ABC1D23)");
-                return false;
-            }
+            if (!placaRegex.test(identificador)) { alert("Placa inválida"); return false; }
         }
         return true;
     }
 
-    function validarEtapa4() {
-        if (mensagensSelecionadas.length === 0) {
-            alert("Selecione pelo menos uma mensagem");
-            return false;
-        }
-        return true;
-    }
-
-    function validarEtapa5() {
-        codigoPagamento = document.getElementById('codigoPagamento').value.trim();
-        if (!codigoPagamento) {
-            alert("Digite o código de pagamento");
-            return false;
-        }
-        return true;
-    }
-
-    function validarEtapa6() {
-        temaSelecionado = document.getElementById('temaSala').value;
-        return true;
-    }
-
-    function validarEtapa7() {
-        tempoHoras = parseInt(document.getElementById('tempoHoras').value) || 48;
-        if (tempoHoras < 1 || tempoHoras > 168) {
-            alert("Digite um valor válido entre 1 e 168 horas");
-            return false;
-        }
-        return true;
-    }
+    function validarEtapa4() { if (mensagensSelecionadas.length === 0) { alert("Selecione pelo menos uma mensagem"); return false; } return true; }
+    function validarEtapa5() { codigoPagamento = document.getElementById('codigoPagamento').value.trim(); if (!codigoPagamento) { alert("Digite o código de pagamento"); return false; } return true; }
+    function validarEtapa6() { temaSelecionado = document.getElementById('temaSala').value; return true; }
+    function validarEtapa7() { tempoHoras = parseInt(document.getElementById('tempoHoras').value) || 48; if (tempoHoras < 1 || tempoHoras > 168) { alert("Valor entre 1 e 168 horas"); return false; } return true; }
 
     async function configurarSala() {
         if (isUpdating) return;
         isUpdating = true;
-        
-        const btnProximo = document.getElementById('btnProximo7');
-        if (btnProximo) {
-            btnProximo.disabled = true;
-            btnProximo.innerText = 'Configurando...';
-        }
-        
+        const btn = document.getElementById('btnProximo7');
+        if (btn) { btn.disabled = true; btn.innerText = 'Configurando...'; }
+
         try {
             const mensagensTexto = mensagensSelecionadas.map(i => mensagensPredefinidas[i]);
             const fotosArray = getFotosArray();
             
-            let temaFinal = '';
-            let tipoSiteFinal = '';
-            
-            if (tipoSiteSelecionado === 'detran') {
-                tipoSiteFinal = 'detran';
-                temaFinal = 'multa';
-            } else if (tipoSiteSelecionado === 'pessoa') {
-                tipoSiteFinal = 'pessoa';
-                temaFinal = 'pessoa';
-            } else {
-                tipoSiteFinal = 'normal';
-                temaFinal = document.getElementById('temaSala').value;
-            }
-            
+            let temaFinal = '', tipoSiteFinal = '';
+            if (tipoSiteSelecionado === 'detran') { tipoSiteFinal = 'detran'; temaFinal = 'multa'; }
+            else if (tipoSiteSelecionado === 'pessoa') { tipoSiteFinal = 'pessoa'; temaFinal = 'pessoa'; }
+            else { tipoSiteFinal = 'normal'; temaFinal = document.getElementById('temaSala').value; }
+
             let nomeSala = '';
-            if (tipoSiteFinal === 'detran') {
-                nomeSala = `Placa ${identificador}`;
-            } else if (tipoSiteFinal === 'pessoa') {
-                nomeSala = `Pessoa ${identificador}`;
-            } else {
-                nomeSala = `Casa ${identificador}`;
-            }
-            
+            if (tipoSiteFinal === 'detran') nomeSala = `Placa ${identificador}`;
+            else if (tipoSiteFinal === 'pessoa') nomeSala = `Pessoa ${identificador}`;
+            else nomeSala = `Casa ${identificador}`;
+
             const expiraEm = Date.now() + (tempoHoras * 60 * 60 * 1000);
 
             await db.ref(`casas/${salaId}`).update({
@@ -1098,126 +461,56 @@
             });
 
             let paginaDestino = '';
-            if (tipoSiteFinal === 'detran') {
-                paginaDestino = 'index-multa.html';
-            } else if (tipoSiteFinal === 'pessoa') {
-                paginaDestino = 'index-pessoa.html';
-            } else if (temaFinal === 'dark') {
-                paginaDestino = 'index-dark.html';
-            } else {
-                paginaDestino = 'index.html';
-            }
+            if (tipoSiteFinal === 'detran') paginaDestino = 'index-multa.html';
+            else if (tipoSiteFinal === 'pessoa') paginaDestino = 'index-pessoa.html';
+            else if (temaFinal === 'dark') paginaDestino = 'index-dark.html';
+            else paginaDestino = 'index.html';
 
-            const resumo = document.getElementById('resumoInfo');
-            resumo.innerHTML = `
+            document.getElementById('resumoInfo').innerHTML = `
                 <strong>${escapeHtml(nomeSala)}</strong><br>
                 ID: ${salaId}<br>
-                ${mensagensTexto.length} mensagens | ${fotosArray.length} fotos<br>
-                💰 Pix: ${escapeHtml(codigoPagamento.substring(0, 30))}${codigoPagamento.length > 30 ? '...' : ''}<br>
+                ${mensagensTexto.length} msgs | ${fotosArray.length} fotos<br>
+                💰 Pix: ${escapeHtml(codigoPagamento.substring(0,30))}<br>
                 ⏱️ Tempo: ${tempoHoras} horas<br>
-                🎨 Tema: ${temaFinal}<br>
-                📄 Tipo: ${tipoSiteFinal}<br>
-                <strong style="color:#34c759;">✅ Clientes serão redirecionados para: ${paginaDestino}</strong>
+                <strong style="color:#34c759;">✅ Clientes irão para: ${paginaDestino}</strong>
             `;
-            
+
         } catch (error) {
             console.error('Erro:', error);
-            alert('Erro ao configurar a sala. Tente novamente.');
+            alert('Erro ao configurar. Tente novamente.');
         } finally {
             isUpdating = false;
-            if (btnProximo) {
-                btnProximo.disabled = false;
-                btnProximo.innerText = 'Continuar →';
-            }
+            if (btn) { btn.disabled = false; btn.innerText = 'Continuar →'; }
         }
     }
 
     async function irParaEtapa(etapa) {
-        if (etapa === 2 && currentStep === 1) {
-        }
-        if (etapa === 3 && currentStep === 2) {
-            if (!validarEtapa2()) return;
-        }
-        if (etapa === 4 && currentStep === 3) {
-        }
-        if (etapa === 5 && currentStep === 4) {
-            if (!validarEtapa4()) return;
-        }
-        if (etapa === 6 && currentStep === 5) {
-            if (!validarEtapa5()) return;
-        }
+        if (etapa === 3 && currentStep === 2 && !validarEtapa2()) return;
+        if (etapa === 5 && currentStep === 4 && !validarEtapa4()) return;
+        if (etapa === 6 && currentStep === 5 && !validarEtapa5()) return;
         
         if (tipoSiteSelecionado !== 'normal') {
-            if (currentStep === 6 && etapa === 7) {
-                currentStep = 7;
-                mostrarEtapa(currentStep);
-                return;
-            }
-            if (currentStep === 5 && etapa === 6) {
+            if ((currentStep === 6 && etapa === 7) || (currentStep === 5 && etapa === 6)) {
                 currentStep = 7;
                 mostrarEtapa(currentStep);
                 return;
             }
         }
         
-        if (etapa === 7 && currentStep === 6) {
-            if (tipoSiteSelecionado === 'normal') {
-                if (!validarEtapa6()) return;
-            }
-        }
-        if (etapa === 8 && currentStep === 7) {
-            if (!validarEtapa7()) return;
-            await configurarSala();
-        }
+        if (etapa === 7 && currentStep === 6 && tipoSiteSelecionado === 'normal' && !validarEtapa6()) return;
+        if (etapa === 8 && currentStep === 7 && !validarEtapa7()) return;
+        if (etapa === 8 && currentStep === 7) await configurarSala();
         
         currentStep = etapa;
         mostrarEtapa(currentStep);
-
         if (currentStep === 3) setupFotosGrid();
         if (currentStep === 4) await carregarMensagensPredefinidas();
     }
 
-    function finalizar() {
-        window.location.href = 'index.html';
-    }
+    function finalizar() { window.location.href = 'index.html'; }
+    function voltarInicio() { window.location.href = 'redirect.html'; }
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
 
-    function voltarInicio() {
-        window.location.href = 'mobile.html';
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-
-    async function iniciar() {
-        const temId = getSalaIdFromURL();
-        if (!temId) {
-            mostrarErro("Nenhum QR Code detectado", "Escaneie um QR Code de uma sala vazia para configurá-la.");
-            return;
-        }
-        
-        const podeConfigurar = await verificarSalaParaConfiguracao();
-        if (!podeConfigurar) return;
-        
-        document.getElementById('configForm').style.display = 'block';
-        document.getElementById('errorCard').style.display = 'none';
-        
-        initTipoSiteButtons();
-        setupFotosGrid();
-        mostrarEtapa(1);
-    }
-
-    document.getElementById('btnVerificarSenha')?.addEventListener('click', verificarSenha);
-    document.getElementById('senhaInput')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') verificarSenha();
-    });
-    
     document.getElementById('btnProximo1')?.addEventListener('click', () => irParaEtapa(2));
     document.getElementById('btnVoltar2')?.addEventListener('click', () => irParaEtapa(1));
     document.getElementById('btnProximo2')?.addEventListener('click', () => irParaEtapa(3));
@@ -1233,8 +526,6 @@
     document.getElementById('btnProximo7')?.addEventListener('click', () => irParaEtapa(8));
     document.getElementById('btnFinalizar')?.addEventListener('click', finalizar);
     document.getElementById('btnVoltarInicio')?.addEventListener('click', voltarInicio);
-
-    verificarSessao();
 </script>
 </body>
 </html>
