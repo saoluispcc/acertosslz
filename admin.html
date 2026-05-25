@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Acesso Restrito</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .login-card {
+            background: #121212;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            border: 1px solid #2a2a2a;
+        }
+        .login-card h2 {
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+        }
+        .login-card p {
+            color: #888;
+            font-size: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        input {
+            width: 100%;
+            padding: 1rem;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 1rem;
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .erro {
+            color: #ff3b30;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>🔐 Acesso Restrito</h2>
+        <p>Digite a senha para acessar o painel</p>
+        <input type="password" id="senhaInput" placeholder="Senha">
+        <button id="btnEntrar">Entrar</button>
+        <div id="erroMsg" class="erro">❌ Senha incorreta!</div>
+    </div>
+
+    <script>
+        const SENHA_CORRETA = "Dellplay321#";
+        
+        document.getElementById('btnEntrar').addEventListener('click', () => {
+            const senha = document.getElementById('senhaInput').value;
+            if (senha === SENHA_CORRETA) {
+                sessionStorage.setItem('senha_autorizada_admin', 'true');
+                window.location.href = 'admin-real.html';
+            } else {
+                document.getElementById('erroMsg').style.display = 'block';
+                document.getElementById('senhaInput').value = '';
+            }
+        });
+        
+        document.getElementById('senhaInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('btnEntrar').click();
+        });
+    </script>
+</body>
+</html>
