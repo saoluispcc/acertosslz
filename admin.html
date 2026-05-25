@@ -793,6 +793,13 @@
     let activeMessageListeners = {};
     let activeCliqueListeners = {};
 
+    // Função para obter a URL correta do mobile
+    function getMobileUrl(salaId) {
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+        return `${window.location.origin}${basePath}mobile.html?id=${salaId}`;
+    }
+
     // TABS
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -897,8 +904,8 @@
             const cliquesPermanentes = JSON.parse(localStorage.getItem('cliques_pagamento_permanente') || '{}');
 
             for (let [id, casa] of salasArray) {
-                // URL aponta para mobile.html (configuração)
-                const urlSite = `${window.location.origin}${window.location.pathname.replace('admin.html', 'mobile.html')}?id=${id}`;
+                // CORREÇÃO: URL aponta para mobile.html (cadastro do cliente)
+                const urlSite = getMobileUrl(id);
                 const expiraEm = casa.expiraEm || (Date.now() + 48 * 3600000);
                 const horasRest = Math.max(0, Math.floor((expiraEm - Date.now()) / 3600000));
                 const isFechada = casa.status === 'fechada';
@@ -1004,7 +1011,6 @@
                     }, 50);
                 }
                 
-                // Iniciar monitores para salas não fechadas
                 if (!isFechada) {
                     monitorarMensagens(id, casa.nome);
                     monitorarCliquePagamento(id, casa.nome);
@@ -1123,7 +1129,8 @@
         
         for (let i = 0; i < salas.length; i++) {
             const sala = salas[i];
-            const urlSite = `${window.location.origin}${window.location.pathname.replace('admin.html', 'mobile.html')}?id=${sala.id}`;
+            // CORREÇÃO: URL aponta para mobile.html
+            const urlSite = getMobileUrl(sala.id);
             const nomeBase = sala.nome.replace(/[^a-z0-9]/gi, '_').toLowerCase();
             
             const tempDiv = document.createElement('div');
@@ -1169,7 +1176,7 @@
         salas.forEach((sala, idx) => {
             infoContent += `${idx + 1}. ${sala.nome}\n`;
             infoContent += `   ID: ${sala.id}\n`;
-            infoContent += `   Link: ${window.location.origin}${window.location.pathname.replace('admin.html', 'mobile.html')}?id=${sala.id}\n\n`;
+            infoContent += `   Link: ${getMobileUrl(sala.id)}\n\n`;
         });
         zip.file(`relatorio_lote_${nomeLote.replace(/[^a-z0-9]/gi, '_')}.txt`, infoContent);
         
@@ -1292,7 +1299,8 @@
             if (!casa) throw new Error('Sala não encontrada');
             const zip = new JSZip();
             const nomeBase = salaNome.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-            const urlSite = `${window.location.origin}${window.location.pathname.replace('admin.html', 'mobile.html')}?id=${salaId}`;
+            // CORREÇÃO: URL aponta para mobile.html
+            const urlSite = getMobileUrl(salaId);
             const tempDiv = document.createElement('div');
             tempDiv.style.position = 'absolute';
             tempDiv.style.left = '-9999px';
@@ -1497,7 +1505,7 @@
                 <td><span style="color:#ff9500;">Confirmado</span><\/td>
             </tr>`;
         });
-        html += '</td>';
+        html += '</table>';
         container.innerHTML = html;
     }
 
@@ -1573,7 +1581,7 @@
         const container = document.getElementById('historicoNotifList');
         if (notificacoes.length === 0) { container.innerHTML = '<div class="empty-state">Nenhuma notificação</div>'; return; }
         let html = '<table class="visitantes-table">';
-        html += '<tr><th>Data</th><th>Sala</th><th>Ação</th><tr>';
+        html += '<tr><th>Data</th><th>Sala</th><th>Ação</th></tr>';
         notificacoes.forEach(n => { html += `<tr>
                 <td>${n.data}</td>
                 <td>${escapeHtml(n.salaNome)}<\/td>
@@ -1640,7 +1648,6 @@
 
     window.abrirChat = async function(id, nome) {
         if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
-        // Marcar mensagens como lidas ao abrir o chat
         const snapshot = await db.ref(`chats/${id}/mensagens`).once('value');
         const msgs = snapshot.val();
         if (msgs) {
