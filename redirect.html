@@ -8,75 +8,40 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #0a0a0a; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .spinner { width: 40px; height: 40px; border: 3px solid #2a2a2a; border-top-color: #007aff; border-radius: 50%; animation: spin 1s linear infinite; margin: 1rem auto; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .texto { color: white; text-align: center; font-family: sans-serif; margin-top: 1rem; }
+        body { background: white; min-height: 100vh; }
     </style>
 </head>
 <body>
-    <div>
-        <div class="spinner"></div>
-        <div class="texto">Acessando...</div>
-    </div>
     <script>
-        const firebaseConfig = {
-            databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/"
-        };
+        const firebaseConfig = { databaseURL: "https://dados-c9c96-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const salaId = urlParams.get('id');
+        const salaId = new URLSearchParams(window.location.search).get('id');
 
         async function redirecionar() {
-            console.log("Redirect - Sala ID:", salaId);
-            
-            if (!salaId) {
-                window.location.href = 'index.html';
-                return;
-            }
-            
+            if (!salaId) { window.location.replace('index.html'); return; }
             try {
-                const snapshot = await db.ref(`casas/${salaId}`).once('value');
-                const sala = snapshot.val();
+                const snap = await db.ref(`casas/${salaId}`).once('value');
+                const sala = snap.val();
+                if (!sala) { window.location.replace('index.html'); return; }
                 
-                if (!sala) {
-                    window.location.href = 'index.html';
-                    return;
-                }
-                
-                const temConteudo = (sala.mensagens && sala.mensagens.length > 0) || (sala.fotos && sala.fotos.length > 0);
-                const estaFechada = sala.status === 'fechada';
+                const temConteudo = (sala.mensagens?.length > 0) || (sala.fotos?.length > 0);
+                const fechada = sala.status === 'fechada';
                 const tema = sala.tema || 'light';
-                const tipoSite = sala.tipoSite || 'normal';
+                const tipo = sala.tipoSite || 'normal';
                 
                 let destino = '';
-                
-                if (estaFechada) {
-                    if (tipoSite === 'detran') destino = 'index-multa.html';
-                    else if (tipoSite === 'pessoa') destino = 'index-pessoa.html';
+                if (fechada || temConteudo) {
+                    if (tipo === 'detran') destino = 'index-multa.html';
+                    else if (tipo === 'pessoa') destino = 'index-pessoa.html';
                     else if (tema === 'dark') destino = 'index-dark.html';
                     else destino = 'index.html';
-                    window.location.href = `${destino}?id=${salaId}`;
-                } 
-                else if (temConteudo) {
-                    if (tipoSite === 'detran') destino = 'index-multa.html';
-                    else if (tipoSite === 'pessoa') destino = 'index-pessoa.html';
-                    else if (tema === 'dark') destino = 'index-dark.html';
-                    else destino = 'index.html';
-                    window.location.href = `${destino}?id=${salaId}`;
-                } 
-                else {
-                    window.location.href = `mobile.html?id=${salaId}`;
+                    window.location.replace(`${destino}?id=${salaId}`);
+                } else {
+                    window.location.replace(`mobile.html?id=${salaId}`);
                 }
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                window.location.href = 'index.html';
-            }
+            } catch(e) { window.location.replace('index.html'); }
         }
-        
         redirecionar();
     </script>
 </body>
